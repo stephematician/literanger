@@ -1,0 +1,7 @@
+#ifndef LITERANGER_TREE_REGRESSION_H
+#define LITERANGER_TREE_REGRESSION_H
+
+#include "TreeRegression.defn.h"
+
+#endif /* LITERANGER_TREE_REGRESSION_H */
+

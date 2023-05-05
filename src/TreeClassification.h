@@ -1,0 +1,7 @@
+#ifndef LITERANGER_TREE_CLASSIFICATION_H
+#define LITERANGER_TREE_CLASSIFICATION_H
+
+#include "TreeClassification.defn.h"
+
+#endif /* LITERANGER_TREE_CLASSIFICATION_H */
+

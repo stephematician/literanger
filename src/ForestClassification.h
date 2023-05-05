@@ -1,0 +1,7 @@
+#ifndef LITERANGER_FOREST_CLASSIFICATION_H
+#define LITERANGER_FOREST_CLASSIFICATION_H
+
+#include "ForestClassification.defn.h"
+
+#endif /* LITERANGER_FOREST_CLASSIFICATION_H */
+

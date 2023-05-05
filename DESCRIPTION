@@ -1,0 +1,38 @@
+Package: literanger
+Title: Random forests for multiple imputation based on 'ranger'
+Version: 0.0.0.9000
+Authors@R:
+    person("Stephen",
+           "Wade",
+           email = "stephematician@gmail.com",
+           role = c("aut", "cre"))
+Description: An updated implementation of R package 'ranger'. 'ranger' is a fast
+    implementation of random forests, particularly suited for high dimensional
+    data. Ensembles of classification and regression (prediction) trees are
+    supported by this update. Sparse data of class 'dgCMatrix' (R package
+    'Matrix') can be directly analyzed. Predictions are either aggregated or
+    given by random draws from in-bag data from a random tree for each new data
+    point. This latter prediction is useful for the Multiple Imputation by
+    Chained Equations (known as MICE) algorithm in Doove, L. L., Van Buuren, S.,
+    & Dusseldorp, E. (2014), "Recursive partitioning for missing data imputation
+    in the presence of interaction effects." Computational statistics & data
+    analysis, 72, pp. 92-104. Survival and probability forests are not supported
+    in the update, nor is data of class 'gwaa.data' (R package 'GenABEL'); use
+    the original 'ranger' package for these analyses.
+Depends:
+    R (>= 3.3.0)
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Suggests:
+    testthat (>= 3.0.0),
+    xml2 (>= 1.3.0)
+Imports:
+    cpp11 (>= 0.4.3),
+    Matrix (>= 1.5.3),
+    stats
+LinkingTo:
+    cpp11 (>= 0.4.3),
+    testthat (>= 3.0.0)
+RoxygenNote: 7.2.3
+SystemRequirements: C++11

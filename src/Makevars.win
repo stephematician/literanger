@@ -1,0 +1,17 @@
+CXX_STD = CXX11
+
+PKG_CPPFLAGS = -I../src -I../winlibs/
+
+# SOURCES = $(wildcard *.cpp)
+# OBJECTS = $(SOURCES:.cpp=.o)
+
+.PHONY: all clean winlibs
+
+all: winlibs $(SHLIB)
+
+winlibs:
+	"${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" "../tools/winlibs.R"
+
+clean:
+	rm -f $(SHLIB) $(OBJECTS)
+

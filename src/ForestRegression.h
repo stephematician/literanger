@@ -1,0 +1,7 @@
+#ifndef LITERANGER_FOREST_REGRESSION_H
+#define LITERANGER_FOREST_REGRESSION_H
+
+#include "ForestRegression.defn.h"
+
+#endif /* LITERANGER_FOREST_REGRESSION_H */
+
