@@ -12,10 +12,21 @@
  * license. You should have received a copy of the MIT license along with
  * literanger. If not, see <https://opensource.org/license/mit/>.
  */
-#ifndef LITERANGER_DATA_H
-#define LITERANGER_DATA_H
+#ifndef LITERANGER_UTILITY_INTERRUPT_H
+#define LITERANGER_UTILITY_INTERRUPT_H
 
-#include "Data.defn.h"
+namespace literanger {
 
-#endif /* LITERANGER_DATA_H */
+/** An interrupt check operator
+ * 
+ * Defaults to never interrupted */
+struct interruptor { virtual bool operator()() const; };
+
+inline bool interruptor::operator()() const { return false; }
+
+
+} /* namespace literanger */
+
+
+#endif /* LITERANGER_UTILITY_INTERRUPT_H */
 

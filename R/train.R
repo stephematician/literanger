@@ -1,59 +1,53 @@
 # -------------------------------------------------------------------------------
-# This has been adapted from Ranger.
+# This file is part of 'literanger'. literanger was adapted from the 'ranger'
+# package for R statistical software. ranger was authored by Marvin N Wright
+# with the GNU General Public License version 3. The adaptation was performed by
+# Stephen Wade in 2023. literanger carries the same license, terms, and
+# permissions as ranger.
 #
-# Ranger is free software: you can redistribute it and/or modify
+# literanger is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Ranger is distributed in the hope that it will be useful,
+# literanger is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Ranger. If not, see <http://www.gnu.org/licenses/>.
+# along with literanger. If not, see <http://www.gnu.org/licenses/>.
 #
 # Written by:
 #
-#   Marvin N. Wright
-# Institut fuer Medizinische Biometrie und Statistik
-# Universitaet zu Luebeck
-# Ratzeburger Allee 160
-# 23562 Luebeck
-# Germany
-#
-# http://www.imbs-luebeck.de
+#   Stephen Wade
+#   Cancer Council New South Wales
+#   Woolloomooloo NSW 2011
+#   Australia
 # -------------------------------------------------------------------------------
-#
-# The adaptation was performed by Stephen Wade. Some features have not been
-# implemented; including:
-#
-# -   formula interface
-# -   probability, survival and quantile regression forests
-# -   class gwaa.data not supported
-# -   variable importance and regularisation
-# -   in-bag data not accessible
-# -   user-specified hold-out data
+
+
 
 #' Train forest using ranger for multiple imputation algorithms.
 #'
 #' 'literanger' trains random forests for use in multiple imputation problems
-#' via an adaptation of the 'ranger' R package. Ranger is a fast
+#' via an adaptation of the 'ranger' R package. ranger is a fast
 #' implementation of random forests (Breiman, 2001) or recursive partitioning,
 #' particularly suited for high dimensional data (Wright et al, 2017a).
 #' literanger supports prediction used in algorithms such as 'Multiple
-#' Imputation via Chained Equations' (Van Buuren, 2007). Specifically, the
-#' trained forest keeps terminal nodes' in-bag data as required by the
-#' imputation algorithm outlined by Doove et al (2014).
+#' Imputation via Chained Equations' (Van Buuren, 2007).
 #'
-#' Classification and regression forests are implemented as in the original
-#' Random Forest (Breiman, 2001) or using extremely randomized trees (Geurts et
-#' al, 2006).
+#' literanger trains classification and regression forests using the original
+#' Random Forest (Breiman, 2001) or extremely randomized trees (Geurts et
+#' al, 2006) algorithms. The trained forest retains information about the in-bag
+#' responses in each terminal node, thus facilitating the algorithm for multiple
+#' imputation with random forests proposed by Doove et al (2014). This algorithm
+#' should match the predictive distribution more closely than using predictive
+#' mean matching.
 #'
 #' The default split metric for classification trees is the Gini impurity, which
 #' can be extended to use the extra-randomized trees rule (Geurts et al, 2006).
-#' For binary responses, the Hellinger distrance metric may be used instead
+#' For binary responses, the Hellinger distance metric may be used instead
 #' (Cieslak et al, 2012).
 #'
 #' The default split metric for regression trees is the estimated variance,
@@ -103,6 +97,17 @@
 #' can handle an unlimited number of factor levels. Note that the factors are
 #' only reordered once and not again in each split.
 #'
+#' Compared to the original package 'ranger', literanger excludes certain
+#' features:
+#'
+#' -   Formula interface.
+#' -   Probability, survival, and quantile regression forests.
+#' -   Support for class gwaa.data.
+#' -   Measures of variable importance.
+#' -   Regularisation of importance.
+#' -   Access to in-bag data via R.
+#' -   Support for user-specified hold-out data.
+#'
 #' @param data Training data of class `data.frame`, `matrix`, or `dgCMatrix`
 #' (Matrix), for the latter two; must have column names.
 #' @param response_name Name of response (dependent) variable if `data` was
@@ -151,7 +156,7 @@
 #' @param response_weights Classification only: Weights for the respones classes
 #' (in order of the factor levels) in the splitting rule e.g. cost-sensitive
 #' learning. Weights are also used by each tree to determine majority vote.
-#' @param n_random_split "extratrees' split metric only: Number of random splits
+#' @param n_random_split "extratrees" split metric only: Number of random splits
 #' to consider for each candidate splitting variable, default is 1.
 #' @param alpha "maxstat" splitting rule only: Significance threshold to allow
 #' splitting, default is 0.5.
@@ -174,11 +179,11 @@
 #'   \item{`tree_type`}{The type of tree in the forest.}
 #'   \item{`n_tree`}{The number of trees that were trained.}
 #'   \item{`n_try`}{The number of predictors drawn as candidates for each
-#'     split}.
+#'     split.}
 #'   \item{`split_rule`}{The name of the split metric used.}
 #'   \item{`min_metric_decrease`}{The minimum decrease in the metric for an
 #'     acceptable split (equal to negative 'alpha' for maximally selected
-#'     rank statistics, else zero.)}
+#'     rank statistics, else zero).}
 #'   \item{`min_split_n_sample`}{The minimum number of in-bag samples in a node
 #'     prior to splitting.}
 #'   \item{`min_leaf_n_sample`}{The minumum number of in-bag samples in a leaf
@@ -205,9 +210,11 @@
 #' iris.test <- iris[-train.idx, ]
 #' rg.iris <- train(data=iris.train, response_name="Species")
 #' pred.iris <- predict(rg.iris, newdata=iris.test)
-#' table(iris.test$Species, pred.iris$predictions)
+#' table(iris.test$Species, pred.iris$values)
 #'
-#' @author Marvin N. Wright, Stephen Wade.
+#' @author Stephen Wade <stephematician@gmail.com>, Marvin N Wright (original
+#' 'ranger' package)
+#'
 #' @references
 #'
 #' -   Breiman, L. (2001). Random forests. _Machine Learning_, 45, 5-32.

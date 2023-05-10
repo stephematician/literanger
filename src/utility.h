@@ -1,18 +1,16 @@
-/* This file was adapted from the C++ core of the "ranger" package for R
- * Statistical Software.
+/* This file is part of the C++ core of 'literanger'.
  *
- * Adaptation was authored by Stephen Wade. The same license terms as the
- * original c++ core of the ranger package apply to the adaptation.
+ * literanger's C++ core was adapted from the C++ core of the 'ranger' package
+ * for R Statistical Software <https://www.r-project.org>. The ranger C++ core
+ * is Copyright (c) [2014-2018] [Marvin N. Wright] and distributed with MIT
+ * license. literanger's C++ core is distributed with the same license, terms,
+ * and permissions as ranger's C++ core.
  *
- * License statement for C++ core of ranger:
- *
- * Copyright (c) [2014-2018] [Marvin N. Wright]
+ * Copyright [2023] [Stephen Wade]
  *
  * This software may be modified and distributed under the terms of the MIT
- * license.
- *
- * Please note that the C++ core of ranger is distributed under MIT license and
- * the R package "ranger" under GPL3 license.
+ * license. You should have received a copy of the MIT license along with
+ * literanger. If not, see <https://opensource.org/license/mit/>.
  */
 #ifndef LITERANGER_UTILITY_H
 #define LITERANGER_UTILITY_H
@@ -30,19 +28,8 @@
 #include <utility>
 #include <vector>
 
-/* R and cpp11 headers */
-#include "cpp11.hpp"
-#include "cpp11/R.hpp"
-#include "R.h"
-
 
 namespace literanger {
-
-/** Test for user interruption. @param x Ignored. */
-static void chk_int_fn(void * x) { R_CheckUserInterrupt(); }
-
-
-/* Declarations */
 
 /** Toggle-able printer */
 struct toggle_print {
@@ -57,43 +44,12 @@ struct toggle_print {
     /** Toggle (indicator) whether to print or not. */
     bool verbose;
 
+    /** Function reference for a printf-like operation.
+     * @param fmt Formatting string for a printf-like operation.
+     * @param ... Additional arguments accepted by printf. */
+    void (& print_fn)(const char * fmt, ...);
+
 };
-
-
-/** Call user-interrupt check at top level of execution (main R thread). */
-bool check_interrupt();
-
-
-/** Convert 1-dimensional cpp11 object into a vector.
- *
- * @tparam FromT the type of the cpp11 to convert
- * @tparam T the value type of the returned std::vector */
-template <typename T, typename FromT>
-std::vector<T> as_vector(const FromT x);
-
-
-/** Convert 1-dimensional cpp11 object into a ptr<vector>.
- *
- * @tparam FromT the type of the cpp11 to convert
- * @tparam T the value type of the returned std::vector */
-template <typename T, typename FromT,
-          template <typename...> class PtrT = std::shared_ptr>
-PtrT<std::vector<T>> as_vector_ptr(const FromT x);
-
-
-/** Convert a 'nested' container of cpp11 objects into vector<vector>.
- * 
- */
-template <typename T, typename NestedT, typename FromT>
-std::vector<std::vector<T>> as_nested(const FromT x);
-
-
-/** Convert a 'nested' container of cpp11 objects into vector<ptr<vector>>.
- * 
- */
-template <typename T, typename NestedT, typename FromT,
-          template <typename...> class PtrT = std::shared_ptr>
-std::vector<PtrT<std::vector<T>>> as_nested_ptr(const FromT x);
 
 
 /** Split (or partition) a range of consecutive integers into equal parts.
@@ -187,52 +143,7 @@ size_t get_predictor_key(const std::vector<std::string> & predictor_names,
 
 template <typename... ArgsT>
 void toggle_print::operator()(const char *fmt, ArgsT &&... args) {
-    if (verbose) Rprintf(fmt, std::forward<ArgsT>(args)...);
-}
-
-
-inline bool check_interrupt() {
-    return (R_ToplevelExec(chk_int_fn, NULL) == FALSE);
-}
-
-
-template <typename T, typename FromT>
-std::vector<T> as_vector(const FromT x) {
-    return cpp11::as_cpp<std::vector<T>>(x);
-}
-
-
-template <typename T, typename FromT,
-          template <typename...> class PtrT>
-PtrT<std::vector<T>> as_vector_ptr(const FromT x) {
-    return PtrT<std::vector<T>>( new std::vector<T>(as_vector<T>(x)) );
-}
-
-
-template <typename T, typename NestedT, typename FromT>
-std::vector<std::vector<T>> as_nested(const FromT x) {
-    std::vector<std::vector<T>> value(x.size());
-    std::transform(
-        x.cbegin(), x.cend(), value.begin(),
-        [](const typename FromT::const_iterator::value_type & item){
-            return as_vector<T>(NestedT(item));
-        }
-    );
-    return value;
-}
-
-
-template <typename T, typename NestedT, typename FromT,
-          template <typename...> class PtrT>
-std::vector<PtrT<std::vector<T>>> as_nested_ptr(const FromT x) {
-    std::vector<PtrT<std::vector<T>>> value(x.size());
-    std::transform(
-        x.cbegin(), x.cend(), value.begin(),
-        [](const typename FromT::const_iterator::value_type & item){
-            return as_vector_ptr<T>(NestedT(item));
-        }
-    );
-    return value;
+    if (verbose) print_fn(fmt, std::forward<ArgsT>(args)...);
 }
 
 
@@ -343,9 +254,9 @@ PtrT<std::vector<bool>> make_is_ordered(
     const std::vector<std::string> & predictor_names,
     const std::vector<std::string> & names_of_unordered
 ) {
-    using vector = std::vector<bool>;
+    using key_vector = std::vector<bool>;
     const size_t n_predictor = predictor_names.size();
-    PtrT<vector> result(new vector(n_predictor, true));
+    PtrT<key_vector> result(new key_vector(n_predictor, true));
 
     for (auto & name : names_of_unordered) {
         const size_t key = get_predictor_key(predictor_names, name);
@@ -362,9 +273,9 @@ PtrT<std::vector<size_t>> make_draw_always_predictor_keys(
     const std::vector<std::string> & names_of_always_draw,
     const size_t n_try
 ) {
-    using vector = std::vector<size_t>;
+    using key_vector = std::vector<size_t>;
     const size_t n_predictor = predictor_names.size();
-    PtrT<vector> result( new vector() );
+    PtrT<key_vector> result( new key_vector() );
 
     if (names_of_always_draw.empty()) return result;
     result->reserve(n_predictor);

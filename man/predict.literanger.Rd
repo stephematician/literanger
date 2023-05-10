@@ -2,7 +2,7 @@
 % Please edit documentation in R/predict.R
 \name{predict.literanger}
 \alias{predict.literanger}
-\title{Ranger prediction}
+\title{Literanger prediction}
 \usage{
 \method{predict}{literanger}(
   object,
@@ -17,50 +17,83 @@
 \arguments{
 \item{object}{A trained random forest \code{literanger} object.}
 
-\item{newdata}{New test data of class \code{data.frame} or `dgCmatrix``.}
+\item{newdata}{Data of class \code{data.frame}, \code{matrix}, or \code{dgCMatrix}
+(Matrix), for the latter two; must have column names; all predictors named in
+\code{object$predictor_names} must be present.}
+
+\item{prediction_type}{Name of the prediction algorithm; "bagged" is the
+most-frequent value amongst in-bag samples for classification, or the mean of
+in-bag responses for regression; "doove" predicts by drawing one in-bag
+response from a random tree for each row.}
 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from
 \code{R}. Set to \code{0} to ignore the \code{R} seed.}
 
-\item{verbose}{Verbose output on or off.}
+\item{n_thread}{Number of threads. Default is determined by system, typically
+the number of cores.}
 
-\item{num.threads}{Number of threads. Default is number of CPUs available.}
+\item{verbose}{Show computation status and estimated runtime.}
 }
 \value{
 Object of class \code{literanger.prediction} with elements:
 \describe{
-\item{\code{predictions}}{Predicted (drawn) classes/value for classification and
+\item{\code{values}}{Predicted (drawn) classes/value for classification and
 regression.}
-\item{\code{num.trees}}{Number of trees.}
-\item{\code{num.independent.variables}}{Number of independent variables.}
-\item{\code{treetype}}{Type of forest/tree. Classification, regression or
-survival.}
-\item{\code{num.samples}}{Number of samples.}
+\item{\code{tree_type}}{Number of trees.}
 }
 }
 \description{
-Predict with new data and a ranger object from Ranger.
+'literanger' provides different types of prediction that may be used in
+multiple imputation algorithms with random forests. The usual prediction is
+the 'bagged' prediction, the most frequent value (or the mean) of the in-bag
+samples in a terminal node. Doove et al (2014) propose a prediction that
+better matches the predictive distribution as needed for multiple imputation;
+take a random draw from the in-bag responses from a random tree in the forest
+for each predicted value needed. Alternatively, the usual most-frequent-value
+or mean of the in-bag responses can be used as in missForest (Stekhoven et
+al, 2014) or miceRanger \url{https://cran.r-project.org/package=miceRanger} and
+missRanger \url{https://cran.r-project.org/package=missRanger}.
 }
 \details{
-The predicted class (classification) or numeric value (regression) is
-returned by drawing a tree and then a sample from the tree for each row of
-the data.
+Forests trained by literanger retain information about the in-bag responses
+in each terminal node, thus facilitating their use within the multiple
+imputation with random forests proposed by Doove et al (2014). This type of
+prediction can be selected by setting \code{prediction_type="doove"}, or the usual
+prediction for classification and regression forests, the most-frequent-value
+and mean of in bag samples respectively, is given by setting
+\code{prediction_type="bagged"}.
 
-Factor levels are returned as numerics. To retrieve the corresponding factor
-levels, use \code{rf$forest$levels}, if \code{rf} is the ranger object.
+A list is returned. The \code{values} item contains the predicted classes or
+values (classification and regression forests, respecitvely). Factor levels
+are returned as factors with the levels as per the original training data.
+
+Compared to the original package 'ranger', literanger excludes certain
+features:
+\itemize{
+\item Probability, survival, and quantile regression forests.
+\item Support for class gwaa.data.
+\item Standard error estimation.
+}
 }
 \examples{
 ## Classification forest
 train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
 iris.train <- iris[train.idx, ]
 iris.test <- iris[-train.idx, ]
-rg.iris <- train_lite(data=iris.train, response_name="Species")
+rg.iris <- train(data=iris.train, response_name="Species")
 pred.iris <- predict(rg.iris, newdata=iris.test)
 table(iris.test$Species, pred.iris$values)
 
 }
 \references{
 \itemize{
+\item Doove, L. L., Van Buuren, S., & Dusseldorp, E. (2014). Recursive
+partitioning for missing data imputation in the presence of interaction
+effects. \emph{Computational Statistics & Data Analysis}, 72, 92-104.
+\doi{10.1016/j.csda.2013.10.025}.
+\item Stekhoven, D.J. and Buehlmann, P. (2012). MissForest--non-parametric
+missing value imputation for mixed-type data. \emph{Bioinformatics}, 28(1),
+112-118. \doi{10.1093/bioinformatics/btr597}.
 \item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of
 Random Forests for High Dimensional Data in C++ and R. J Stat Softw
 77:1-17. \doi{10.18637/jss.v077.i01}.
@@ -70,5 +103,6 @@ Random Forests for High Dimensional Data in C++ and R. J Stat Softw
 \code{\link{train}}
 }
 \author{
-Marvin N. Wright
+Stephen Wade \href{mailto:stephematician@gmail.com}{stephematician@gmail.com}, Marvin N Wright (original
+'ranger' package)
 }

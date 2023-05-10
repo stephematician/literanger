@@ -1,18 +1,16 @@
-/* This file was adapted from the C++ core of the "ranger" package for R
- * Statistical Software.
+/* This file is part of the C++ core of 'literanger'.
  *
- * Adaptation was authored by Stephen Wade. The same license terms as the
- * original c++ core of the ranger package apply to the adaptation.
+ * literanger's C++ core was adapted from the C++ core of the 'ranger' package
+ * for R Statistical Software <https://www.r-project.org>. The ranger C++ core
+ * is Copyright (c) [2014-2018] [Marvin N. Wright] and distributed with MIT
+ * license. literanger's C++ core is distributed with the same license, terms,
+ * and permissions as ranger's C++ core.
  *
- * License statement for C++ core of ranger:
- *
- * Copyright (c) [2014-2018] [Marvin N. Wright]
+ * Copyright [2023] [Stephen Wade]
  *
  * This software may be modified and distributed under the terms of the MIT
- * license.
- *
- * Please note that the C++ core of ranger is distributed under MIT license and
- * the R package "ranger" under GPL3 license.
+ * license. You should have received a copy of the MIT license along with
+ * literanger. If not, see <https://opensource.org/license/mit/>.
  */
 #ifndef LITERANGER_FOREST_BASE_DEFN_H
 #define LITERANGER_FOREST_BASE_DEFN_H
@@ -84,6 +82,7 @@ ForestBase::get_tree_parameters() const {
 inline void ForestBase::show_progress(std::string operation,
                                       const size_t max_events,
                                       const size_t n_thread,
+                                      const interruptor & user_interrupt,
                                       toggle_print & print_out) {
 
     using std::chrono::steady_clock;
@@ -95,7 +94,7 @@ inline void ForestBase::show_progress(std::string operation,
     steady_clock::time_point t_last = steady_clock::now();
     std::unique_lock<std::mutex> lock(mutex);
 
-    while (event_count < max_events && !(interrupted |= check_interrupt())) {
+    while (event_count < max_events && !(interrupted |= user_interrupt())) {
 
       /* Release lock until we receive a notification (i.e. an item of work is
        * done) or an error has occured. */

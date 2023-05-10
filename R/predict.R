@@ -1,68 +1,82 @@
 # -------------------------------------------------------------------------------
-# This has been adapted from Ranger.
+# This file is part of 'literanger'. literanger was adapted from the 'ranger'
+# package for R statistical software. ranger was authored by Marvin N Wright
+# with the GNU General Public License version 3. The adaptation was performed by
+# Stephen Wade in 2023. literanger carries the same license, terms, and
+# permissions as ranger.
 #
-# Ranger is free software: you can redistribute it and/or modify
+# literanger is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Ranger is distributed in the hope that it will be useful,
+# literanger is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Ranger. If not, see <http://www.gnu.org/licenses/>.
+# along with literanger. If not, see <http://www.gnu.org/licenses/>.
 #
 # Written by:
 #
-#   Marvin N. Wright
-# Institut fuer Medizinische Biometrie und Statistik
-# Universitaet zu Luebeck
-# Ratzeburger Allee 160
-# 23562 Luebeck
-# Germany
-#
-# http://www.imbs-luebeck.de
+#   Stephen Wade
+#   Cancer Council New South Wales
+#   Woolloomooloo NSW 2011
+#   Australia
 # -------------------------------------------------------------------------------
-#
-# The adaptation was performed by Stephen Wade. The changes include eliminating
-# features that were not required for the multiple imputation procedure. These
-# include (for now):
-#
-# 1.  `type` argument; the predictions are always drawn from the original
-#     (in-bag) data for the node.
-# 2.  Probability and survival forests are not supported.
-# 3.  GWAS data (gwaa.data) not supported.
-# 4.  No standard error estimate provided.
 
-#' Ranger prediction
+#' Literanger prediction
 #'
-#' Predict with new data and a ranger object from Ranger.
+#' 'literanger' provides different types of prediction that may be used in
+#' multiple imputation algorithms with random forests. The usual prediction is
+#' the 'bagged' prediction, the most frequent value (or the mean) of the in-bag
+#' samples in a terminal node. Doove et al (2014) propose a prediction that
+#' better matches the predictive distribution as needed for multiple imputation;
+#' take a random draw from the in-bag responses from a random tree in the forest
+#' for each predicted value needed. Alternatively, the usual most-frequent-value
+#' or mean of the in-bag responses can be used as in missForest (Stekhoven et
+#' al, 2014) or miceRanger <https://cran.r-project.org/package=miceRanger> and
+#' missRanger <https://cran.r-project.org/package=missRanger>.
 #'
-#' The predicted class (classification) or numeric value (regression) is
-#' returned by drawing a tree and then a sample from the tree for each row of
-#' the data.
+#' Forests trained by literanger retain information about the in-bag responses
+#' in each terminal node, thus facilitating their use within the multiple
+#' imputation with random forests proposed by Doove et al (2014). This type of
+#' prediction can be selected by setting `prediction_type="doove"`, or the usual
+#' prediction for classification and regression forests, the most-frequent-value
+#' and mean of in bag samples respectively, is given by setting
+#' `prediction_type="bagged"`.
 #'
-#' Factor levels are returned as numerics. To retrieve the corresponding factor
-#' levels, use `rf$forest$levels`, if `rf` is the ranger object.
+#' A list is returned. The `values` item contains the predicted classes or
+#' values (classification and regression forests, respecitvely). Factor levels
+#' are returned as factors with the levels as per the original training data.
+#'
+#' Compared to the original package 'ranger', literanger excludes certain
+#' features:
+#'
+#' -   Probability, survival, and quantile regression forests.
+#' -   Support for class gwaa.data.
+#' -   Standard error estimation.
 #'
 #' @param object A trained random forest `literanger` object.
-#' @param newdata New test data of class `data.frame` or `dgCmatrix``.
+#' @param newdata Data of class `data.frame`, `matrix`, or `dgCMatrix`
+#' (Matrix), for the latter two; must have column names; all predictors named in
+#' `object$predictor_names` must be present.
+#' @param prediction_type Name of the prediction algorithm; "bagged" is the
+#' most-frequent value amongst in-bag samples for classification, or the mean of
+#' in-bag responses for regression; "doove" predicts by drawing one in-bag
+#' response from a random tree for each row.
 #' @param seed Random seed. Default is `NULL`, which generates the seed from
 #'   `R`. Set to `0` to ignore the `R` seed.
-#' @param num.threads Number of threads. Default is number of CPUs available.
-#' @param verbose Verbose output on or off.
+#' @param n_thread Number of threads. Default is determined by system, typically
+#' the number of cores.
+#' @param verbose Show computation status and estimated runtime.
 #'
 #' @return Object of class `literanger.prediction` with elements:
 #' \describe{
-#'   \item{`predictions`}{Predicted (drawn) classes/value for classification and
+#'   \item{`values`}{Predicted (drawn) classes/value for classification and
 #'     regression.}
-#'   \item{`num.trees`}{Number of trees.}
-#'   \item{`num.independent.variables`}{Number of independent variables.}
-#'   \item{`treetype`}{Type of forest/tree. Classification, regression or
-#'     survival.}
-#'   \item{`num.samples`}{Number of samples.}
+#'   \item{`tree_type`}{Number of trees.}
 #' }
 #'
 #' @examples
@@ -70,17 +84,28 @@
 #' train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
 #' iris.train <- iris[train.idx, ]
 #' iris.test <- iris[-train.idx, ]
-#' rg.iris <- train_lite(data=iris.train, response_name="Species")
+#' rg.iris <- train(data=iris.train, response_name="Species")
 #' pred.iris <- predict(rg.iris, newdata=iris.test)
 #' table(iris.test$Species, pred.iris$values)
 #'
+#' @author Stephen Wade <stephematician@gmail.com>, Marvin N Wright (original
+#' 'ranger' package)
+#'
 #' @references
+#'
+#' -   Doove, L. L., Van Buuren, S., & Dusseldorp, E. (2014). Recursive
+#'     partitioning for missing data imputation in the presence of interaction
+#'     effects. _Computational Statistics & Data Analysis_, 72, 92-104.
+#'     \doi{10.1016/j.csda.2013.10.025}.
+#' -   Stekhoven, D.J. and Buehlmann, P. (2012). MissForest--non-parametric
+#'     missing value imputation for mixed-type data. _Bioinformatics_, 28(1),
+#'     112-118. \doi{10.1093/bioinformatics/btr597}.
 #' -   Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of
 #'     Random Forests for High Dimensional Data in C++ and R. J Stat Softw
 #'     77:1-17. \doi{10.18637/jss.v077.i01}.
 #'
 #' @seealso \code{\link{train}}
-#' @author Marvin N. Wright
+#'
 #' @export
 #' @md
 predict.literanger <- function(
@@ -89,60 +114,51 @@ predict.literanger <- function(
     n_thread=0, verbose=F, ...
 ) {
 
-  # if (is.null(forest$num.trees) ||
-  #       is.null(forest$child.nodeIDs) || is.null(forest$split.varIDs) ||
-  #       is.null(forest$split.values) || is.null(forest$independent.variable.names) ||
-  #       is.null(forest$treetype)) {
-  #   stop("Error: Invalid forest object.")
-  # }
-
-  # Non-quantile prediction ?
     if (is.null(newdata))
         stop("Argument 'newdata' is required for prediction.")
     x <- newdata
 
-  # Sparse matrix data
     if (inherits(x, "Matrix") && !inherits(x, "dgCMatrix"))
         stop("Currently only sparse data of class 'dgCMatrix' ",
              "supported.")
 
-    input_is_matrix <- is.matrix(x) || inherits(x, "Matrix")
-    var_names_x <- if (input_is_matrix) colnames(x) else names(x)
+    is_df <- is.data.frame(x)
+    x_names <- if(is_df) names(x) else colnames(x)
 
     predictor_names <- object$predictor_names
-    if (input_is_matrix && !all(predictor_names %in% var_names_x))
-        stop("One or more independent variables not found in data.")
+    if (!all(predictor_names %in% x_names))
+        stop("One or more predictors not found in data.")
 
-    if (!identical(var_names_x, predictor_names)) {
-        if (input_is_matrix) {
-            x <- x[, var_names_x %in% predictor_names, drop=F]
+    if (!identical(x_names, predictor_names)) {
+        if (!is_df) {
+            x <- x[, predictor_names, drop=F]
         } else {
             x <- x[predictor_names]
         }
     }
 
   # Recode characters
-    if (!input_is_matrix) {
+    if (is_df) {
         char_columns <- sapply(x, is.character)
         x[char_columns] <- lapply(x[char_columns], factor)
     }
 
   # Recode factors if forest grown in 'ordered' mode
-    predictor_levels <- object$predictor_levels
+    predictor_levels <- (object$predictor_levels)[predictor_names]
     factor_ind <- !sapply(predictor_levels, is.null)
     if (length(factor_ind) > 0) {
 
-        if (input_is_matrix) stop("Expected newdata to be a data.frame",
-            "factors")
+        if (!is_df) stop("'newdata' must be data.frame with factor class for: ",
+            paste(names(predictor_levels)[factor_ind], collapse=", "), ".")
 
         x[factor_ind] <- mapply(
             function(x_j, levels_j) {
                 if (!identical(setdiff(levels(x_j), levels_j), character()))
-                    warning("Predictor levels found that were",
-                        "not present during training")
+                    warning("Predictor levels found that were not present ",
+                        "during training")
                 factor(x_j, levels=union(levels_j, levels(x_j)), exclude=NULL)
             },
-            x[factor_ind], object$predictor_levels[factor_ind], SIMPLIFY=F
+            x[factor_ind], predictor_levels[factor_ind], SIMPLIFY=F
         )
 
     }
@@ -153,12 +169,12 @@ predict.literanger <- function(
         stop("Missing values in the predictors: ",
              paste0(offending_columns, collapse = ", "), ".", call.=F)
     }
- 
+
     prediction_type <- match.arg(prediction_type)
 
   # Num threads; default 0 => detect from system in C++.
     if (!is.numeric(n_thread) || n_thread < 0)
-        stop("Invalid value for n_thread")
+        stop("Invalid value for 'n_thread'")
 
   # Use sparse matrix
     if (inherits(x, "dgCMatrix")) {
@@ -184,7 +200,7 @@ predict.literanger <- function(
         result$values <- factor(result$values,
                                 levels=seq_along(object$response_levels),
                                 labels=object$response_levels)
-    
+
     class(result) <- "literanger.prediction"
 
     invisible(result)

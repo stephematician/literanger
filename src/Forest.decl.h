@@ -1,18 +1,16 @@
-/* This file was adapted from the C++ core of the "ranger" package for R
- * Statistical Software.
+/* This file is part of the C++ core of 'literanger'.
  *
- * Adaptation was authored by Stephen Wade. The same license terms as the
- * original c++ core of the ranger package apply to the adaptation.
+ * literanger's C++ core was adapted from the C++ core of the 'ranger' package
+ * for R Statistical Software <https://www.r-project.org>. The ranger C++ core
+ * is Copyright (c) [2014-2018] [Marvin N. Wright] and distributed with MIT
+ * license. literanger's C++ core is distributed with the same license, terms,
+ * and permissions as ranger's C++ core.
  *
- * License statement for C++ core of ranger:
- *
- * Copyright (c) [2014-2018] [Marvin N. Wright]
+ * Copyright [2023] [Stephen Wade]
  *
  * This software may be modified and distributed under the terms of the MIT
- * license.
- *
- * Please note that the C++ core of ranger is distributed under MIT license and
- * the R package "ranger" under GPL3 license.
+ * license. You should have received a copy of the MIT license along with
+ * literanger. If not, see <https://opensource.org/license/mit/>.
  */
 #ifndef LITERANGER_FOREST_DECL_H
 #define LITERANGER_FOREST_DECL_H
@@ -69,6 +67,7 @@ struct Forest : public ForestBase {
                    const dbl_vector_ptr case_weights,
                    const size_t seed, const size_t n_thread,
                    const bool compute_oob_error,
+                   const interruptor & user_interrupt,
                    double & oob_error,
                    toggle_print & print_out);
 
@@ -101,6 +100,7 @@ struct Forest : public ForestBase {
          * engine.
          * @param[in] n_thread Number of threads to use when growing and
          * predicting.
+         * @param[in] user_interrupt An operator that checks for user interrupt.
          * @param[out] result The predictions for each case.
          * @param[out] print_out A toggle-able printer for outputting progress
          * when training or predicting.
@@ -111,6 +111,7 @@ struct Forest : public ForestBase {
         template <PredictionType prediction_type, typename result_type>
         void predict(const std::shared_ptr<const Data> data,
                      const size_t seed, const size_t n_thread,
+                     const interruptor & user_interrupt,
                      result_type & result, toggle_print & print_out);
 
 

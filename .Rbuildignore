@@ -1,3 +1,6 @@
 .gitignore
 
+winlibs/
+.vscode/
+
 cran-comments.md

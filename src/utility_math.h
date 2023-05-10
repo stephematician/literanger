@@ -1,18 +1,16 @@
-/* This file was adapted from the C++ core of the "ranger" package for R
- * Statistical Software.
+/* This file is part of the C++ core of 'literanger'.
  *
- * Adaptation was authored by Stephen Wade. The same license terms as the
- * original c++ core of the ranger package apply to the adaptation.
+ * literanger's C++ core was adapted from the C++ core of the 'ranger' package
+ * for R Statistical Software <https://www.r-project.org>. The ranger C++ core
+ * is Copyright (c) [2014-2018] [Marvin N. Wright] and distributed with MIT
+ * license. literanger's C++ core is distributed with the same license, terms,
+ * and permissions as ranger's C++ core.
  *
- * License statement for C++ core of ranger:
- *
- * Copyright (c) [2014-2018] [Marvin N. Wright]
+ * Copyright [2023] [Stephen Wade]
  *
  * This software may be modified and distributed under the terms of the MIT
- * license.
- *
- * Please note that the C++ core of ranger is distributed under MIT license and
- * the R package "ranger" under GPL3 license.
+ * license. You should have received a copy of the MIT license along with
+ * literanger. If not, see <https://opensource.org/license/mit/>.
  */
 #ifndef LITERANGER_UTILITY_MATH_H
 #define LITERANGER_UTILITY_MATH_H

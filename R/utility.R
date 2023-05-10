@@ -1,38 +1,36 @@
 # -------------------------------------------------------------------------------
-# This has been adapted from Ranger.
+# This file is part of 'literanger'. literanger was adapted from the 'ranger'
+# package for R statistical software. ranger was authored by Marvin N Wright
+# with the GNU General Public License version 3. The adaptation was performed by
+# Stephen Wade in 2023. literanger carries the same license, terms, and
+# permissions as ranger.
 #
-# Ranger is free software: you can redistribute it and/or modify
+# literanger is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# Ranger is distributed in the hope that it will be useful,
+# literanger is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with Ranger. If not, see <http://www.gnu.org/licenses/>.
+# along with literanger. If not, see <http://www.gnu.org/licenses/>.
 #
 # Written by:
 #
-#   Marvin N. Wright
-# Institut fuer Medizinische Biometrie und Statistik
-# Universitaet zu Luebeck
-# Ratzeburger Allee 160
-# 23562 Luebeck
-# Germany
-#
-# http://www.imbs-luebeck.de
+#   Stephen Wade
+#   Cancer Council New South Wales
+#   Woolloomooloo NSW 2011
+#   Australia
 # -------------------------------------------------------------------------------
-#
-# The adaptation was performed by Stephen Wade. The changes include eliminating
-# features that were not required for the multiple imputation procedure.
 
 # Order factor levels with PCA approach
 # Reference: Coppersmith, D., Hong, S.J. & Hosking, J.R. (1999) Partitioning
 # Nominal Attributes in Decision Trees. Data Min Knowl Discov 3:197.
 # \doi{10.1023/A:1009869804967}.
+#' @author Marvin N Wright
 #' @importFrom stats cov.wt prcomp
 pca_order <- function(y, x) {
     x <- droplevels(x)

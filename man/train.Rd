@@ -101,7 +101,7 @@ leaf node.}
 (in order of the factor levels) in the splitting rule e.g. cost-sensitive
 learning. Weights are also used by each tree to determine majority vote.}
 
-\item{n_random_split}{"extratrees' split metric only: Number of random splits
+\item{n_random_split}{"extratrees" split metric only: Number of random splits
 to consider for each candidate splitting variable, default is 1.}
 
 \item{alpha}{"maxstat" splitting rule only: Significance threshold to allow
@@ -131,11 +131,11 @@ model.}
 \item{\code{tree_type}}{The type of tree in the forest.}
 \item{\code{n_tree}}{The number of trees that were trained.}
 \item{\code{n_try}}{The number of predictors drawn as candidates for each
-split}.
+split.}
 \item{\code{split_rule}}{The name of the split metric used.}
 \item{\code{min_metric_decrease}}{The minimum decrease in the metric for an
 acceptable split (equal to negative 'alpha' for maximally selected
-rank statistics, else zero.)}
+rank statistics, else zero).}
 \item{\code{min_split_n_sample}}{The minimum number of in-bag samples in a node
 prior to splitting.}
 \item{\code{min_leaf_n_sample}}{The minumum number of in-bag samples in a leaf
@@ -154,22 +154,24 @@ in the order they appear in the data.}
 }
 \description{
 'literanger' trains random forests for use in multiple imputation problems
-via an adaptation of the 'ranger' R package. Ranger is a fast
+via an adaptation of the 'ranger' R package. ranger is a fast
 implementation of random forests (Breiman, 2001) or recursive partitioning,
 particularly suited for high dimensional data (Wright et al, 2017a).
 literanger supports prediction used in algorithms such as 'Multiple
-Imputation via Chained Equations' (Van Buuren, 2007). Specifically, the
-trained forest keeps terminal nodes' in-bag data as required by the
-imputation algorithm outlined by Doove et al (2014).
+Imputation via Chained Equations' (Van Buuren, 2007).
 }
 \details{
-Classification and regression forests are implemented as in the original
-Random Forest (Breiman, 2001) or using extremely randomized trees (Geurts et
-al, 2006).
+literanger trains classification and regression forests using the original
+Random Forest (Breiman, 2001) or extremely randomized trees (Geurts et
+al, 2006) algorithms. The trained forest retains information about the in-bag
+responses in each terminal node, thus facilitating the algorithm for multiple
+imputation with random forests proposed by Doove et al (2014). This algorithm
+should match the predictive distribution more closely than using predictive
+mean matching.
 
 The default split metric for classification trees is the Gini impurity, which
 can be extended to use the extra-randomized trees rule (Geurts et al, 2006).
-For binary responses, the Hellinger distrance metric may be used instead
+For binary responses, the Hellinger distance metric may be used instead
 (Cieslak et al, 2012).
 
 The default split metric for regression trees is the estimated variance,
@@ -219,6 +221,18 @@ table (Coppersmith et al, 1999).
 The use of "order" is recommended, as it computationally fast and
 can handle an unlimited number of factor levels. Note that the factors are
 only reordered once and not again in each split.
+
+Compared to the original package 'ranger', literanger excludes certain
+features:
+\itemize{
+\item Formula interface.
+\item Probability, survival, and quantile regression forests.
+\item Support for class gwaa.data.
+\item Measures of variable importance.
+\item Regularisation of importance.
+\item Access to in-bag data via R.
+\item Support for user-specified hold-out data.
+}
 }
 \examples{
 ## Classification forest with default settings
@@ -230,7 +244,7 @@ iris.train <- iris[train.idx, ]
 iris.test <- iris[-train.idx, ]
 rg.iris <- train(data=iris.train, response_name="Species")
 pred.iris <- predict(rg.iris, newdata=iris.test)
-table(iris.test$Species, pred.iris$predictions)
+table(iris.test$Species, pred.iris$values)
 
 }
 \references{
@@ -273,5 +287,6 @@ rank statistics. \emph{Statistics in medicine}, 36(8), 1272-1284.
 \code{\link{predict.literanger}}
 }
 \author{
-Marvin N. Wright, Stephen Wade.
+Stephen Wade \href{mailto:stephematician@gmail.com}{stephematician@gmail.com}, Marvin N Wright (original
+'ranger' package)
 }

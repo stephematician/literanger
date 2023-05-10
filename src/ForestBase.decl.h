@@ -1,18 +1,16 @@
-/* This file was adapted from the C++ core of the "ranger" package for R
- * Statistical Software.
+/* This file is part of the C++ core of 'literanger'.
  *
- * Adaptation was authored by Stephen Wade. The same license terms as the
- * original c++ core of the ranger package apply to the adaptation.
+ * literanger's C++ core was adapted from the C++ core of the 'ranger' package
+ * for R Statistical Software <https://www.r-project.org>. The ranger C++ core
+ * is Copyright (c) [2014-2018] [Marvin N. Wright] and distributed with MIT
+ * license. literanger's C++ core is distributed with the same license, terms,
+ * and permissions as ranger's C++ core.
  *
- * License statement for C++ core of ranger:
- *
- * Copyright (c) [2014-2018] [Marvin N. Wright]
+ * Copyright [2023] [Stephen Wade]
  *
  * This software may be modified and distributed under the terms of the MIT
- * license.
- *
- * Please note that the C++ core of ranger is distributed under MIT license and
- * the R package "ranger" under GPL3 license.
+ * license. You should have received a copy of the MIT license along with
+ * literanger. If not, see <https://opensource.org/license/mit/>.
  */
 #ifndef LITERANGER_FOREST_BASE_DECL_H
 #define LITERANGER_FOREST_BASE_DECL_H
@@ -30,6 +28,7 @@
 #include "enum_types.h"
 #include "globals.h"
 #include "utility.h" // toggle_print
+#include "utility_interrupt.h" // interruptor
 /* required literanger class declarations */
 #include "Data.decl.h"
 #include "TreeBase.decl.h"
@@ -68,6 +67,7 @@ struct ForestBase {
          * predicting.
          * @param[in] compute_oob_error Indicator of whether to estimate the
          * out-of-bag error or not.
+         * @param[in] user_interrupt An operator that checks for user interrupt.
          * @param[out] oob_error The value of the out-of-bag error if requested.
          * @param[out] print_out A toggle-able printer for outputting progress
          * when training or predicting. */
@@ -76,6 +76,7 @@ struct ForestBase {
                            const size_t seed,
                            const size_t n_thread,
                            const bool compute_oob_error,
+                           const interruptor & user_interrupt,
                            double & oob_error,
                            toggle_print & print_out) = 0;
 
@@ -101,11 +102,14 @@ struct ForestBase {
          * @param[in] max_events The total number of events in the process.
          * @param[in] n_thread Number of threads to use when growing and
          * predicting.
+         * @param[in] user_interrupt An operator that checks for user interrupt.
          * @param[out] print_out A toggle-able printer for outputting progress
          * when training or predicting.
          */
         void show_progress(std::string operation, const size_t max_events,
-                           const size_t n_thread, toggle_print & print_out);
+                           const size_t n_thread,
+                           const interruptor & user_interrupt,
+                           toggle_print & print_out);
 
         /** The type of tree grown in the forest.
          *

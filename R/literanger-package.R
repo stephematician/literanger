@@ -1,16 +1,21 @@
 #' \pkg{literanger}: Random forests for multiple imputation algorithms.
 #'
 #' 'literanger' is an adaption of the 'ranger' R package for training and
-#' predicting from random forest models within multiple imputation problems.
-#' 'ranger' is a fast implementation of random forests (Breiman, 2001) or
+#' predicting from random forest models within multiple imputation algorithms.
+#' ranger is a fast implementation of random forests (Breiman, 2001) or
 #' recursive partitioning, particularly suited for high dimensional data
 #' (Wright et al, 2017a). literanger enables random forests to be embedded in
 #' the fully conditional specification framework for multiple imputation known
-#' as  'Multiple Imputation via Chained Equations' (Van Buuren 2007).
-#' Specifically, literanger records terminal nodes' in-bag data as needed by
-#' the algorithm described in Doove et al (2014). Alternatively, the usual
-#' bagged prediction can be provided as in the imputation algorithm called
-#' 'missForest' (Stekhoven et al, 2014).
+#' as 'Multiple Imputation via Chained Equations' (Van Buuren 2007).
+#'
+#' literanger trains classification and regression forests. The trained forest
+#' retains information about the in-bag responses in each terminal node, thus 
+#' facilitating their use within multiple imputation with random forests
+#' proposed by Doove et al (2014). This multiple imputation algorithm has
+#' better predictive distribution properties than competing approaches which
+#' use predictive mean matching. Alternatively, the usual bagged prediction may
+#' be used as in the imputation algorithm called 'missForest' (Stekhoven et
+#' al, 2014).
 #'
 #' Classification and regression forests are implemented as in the original
 #' Random Forest (Breiman, 2001) or using extremely randomized trees (Geurts et
@@ -19,7 +24,8 @@
 #'
 #' Split selection may be based on improvement in metrics such as the variance,
 #' Gini impurity, beta log-likelihood (Weinhold et al, 2019), Hellinger distance
-#' (Cieslak et al, 2012) or maximally selected statistics (Wright et al, 2017b).
+#' (Cieslak et al, 2012) or maximally selected rank statistics (Wright et
+#' al, 2017b).
 #'
 #' See <https://github.com/imbs-hl/ranger> for the development version of ranger
 #' or <https://github.com/stephematician/literanger> for development version of
@@ -38,38 +44,67 @@
 #' the 'ranger' R package, namely the GPL3 license
 #' <https://www.r-project.org/Licenses/GPL-3>, <http:://www.gnu.org/licenses>.
 #'
+#'
+#' # License
+#'
+#' literanger was adapted from the 'ranger' package for R statistical software.
+#' ranger was authored by Marvin N. Wright with the GNU General Public License
+#' version 3 for the R package (interface), while the C++ core of ranger has the
+#' MIT license. The adaptation was performed by Stephen Wade in 2023. literanger
+#' carries the same license, terms, and permissions as ranger, including the GNU
+#' General Public License 3 for the R package interface, and the MIT license for
+#' the C++ core.
+#'
 #' License statement for C++ core of ranger:
 #'
-#'    Copyright (c) [2014-2018] [Marvin N. Wright]
-#'    
-#'    This software may be modified and distributed under the terms of the MIT
-#'    license.
-#'    
-#'    Please note that the C++ core of ranger is distributed under MIT license
-#'    and the R package "ranger" under GPL3 license.
+#' ```
+#' MIT License
 #'
-#' License statement for the additions to the core in the 'ranger' R package:
+#' Copyright (c) [2014-2018] [Marvin N. Wright]
 #'
-#'    Ranger is free software: you can redistribute it and/or modify it under
-#'    the terms of the GNU General Public License as published by the Free
-#'    Software Foundation, either version 3 of the License, or (at your option)
-#'    any later version.
-#'    
-#'    Ranger is distributed in the hope that it will be useful, but WITHOUT ANY
-#'    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-#'    FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-#'    details.
-#'    
-#'    You should have received a copy of the GNU General Public License along
-#'    with Ranger. If not, see <http://www.gnu.org/licenses/>.
-#'    
-#'    Written by:
-#'    Marvin N. Wright
-#'    Institut für Medizinische Biometrie und Statistik
-#'    Universität zu Lübeck
-#'    Ratzeburger Allee 160
-#'    23562 Lübeck
-#'    http://www.imbs-luebeck.d
+#' Permission is hereby granted, free of charge, to any person obtaining a copy
+#' of this software and associated documentation files (the “Software”), to deal
+#' in the Software without restriction, including without limitation the rights
+#' to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#' copies of the Software, and to permit persons to whom the Software is
+#' furnished to do so, subject to the following conditions:
+#'
+#' The above copyright notice and this permission notice shall be included in
+#' all copies or substantial portions of the Software.
+#'
+#' THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#' IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#' FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#'  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#' LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#' OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#' SOFTWARE.
+#' ```
+#'
+#' License statement for the ranger R package interface:
+#'
+#' ```
+#' Ranger is free software: you can redistribute it and/or modify it under
+#' the terms of the GNU General Public License as published by the Free
+#' Software Foundation, either version 3 of the License, or (at your option)
+#' any later version.
+#'
+#' Ranger is distributed in the hope that it will be useful, but WITHOUT ANY
+#' WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+#' FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+#' details.
+#'
+#' You should have received a copy of the GNU General Public License along
+#' with Ranger. If not, see <http://www.gnu.org/licenses/>.
+#'
+#' Written by:
+#' Marvin N. Wright
+#' Institut für Medizinische Biometrie und Statistik
+#' Universität zu Lübeck
+#' Ratzeburger Allee 160
+#' 23562 Lübeck
+#' http://www.imbs-luebeck.d
+#' ```
 #'
 #' @references
 #'
