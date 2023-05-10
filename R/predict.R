@@ -71,6 +71,7 @@
 #' @param n_thread Number of threads. Default is determined by system, typically
 #' the number of cores.
 #' @param verbose Show computation status and estimated runtime.
+#' @param ... Ignored.
 #'
 #' @return Object of class `literanger.prediction` with elements:
 #' \describe{

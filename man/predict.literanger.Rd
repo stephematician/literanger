@@ -33,6 +33,8 @@ response from a random tree for each row.}
 the number of cores.}
 
 \item{verbose}{Show computation status and estimated runtime.}
+
+\item{...}{Ignored.}
 }
 \value{
 Object of class \code{literanger.prediction} with elements:
