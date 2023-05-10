@@ -556,7 +556,7 @@ train <- function(
             if (max(n_level) > limit_n_level)
                 stop("Too many levels in unordered categorical variable ",
                      names_of_unordered[which.max(n_level)],
-                     ". Only ", limit_n_level, " levels allowed on this",
+                     ". Only ", limit_n_level, " levels allowed on this ",
                      "system. Consider using the 'order' option.", sep="")
         } else {
             names_of_unordered <- character()

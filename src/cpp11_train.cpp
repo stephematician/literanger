@@ -171,8 +171,7 @@ cpp11::list cpp11_train(
     set_min_split_n_sample(min_split_n_sample, enum_tree_type);
     set_min_leaf_n_sample(min_leaf_n_sample, enum_tree_type);
 
-    // TODO: fix memory waste - also fix is_ordered.
-  /* Construct the containe for the parameters of each tree in the forest. */
+  /* Construct the container for the parameters of each tree in the forest. */
     std::vector<TreeParameters> tree_parameters;
     const auto is_ordered = make_is_ordered(std_predictor_names,
                                             std_names_of_unordered);
@@ -217,8 +216,8 @@ cpp11::list cpp11_train(
          * to Eigen::sparseMatrix<double>. */
         cpp11::integers sp_i    = { sparse_x.attr("i") };
         cpp11::integers sp_p    = { sparse_x.attr("p") };
-        cpp11::doubles sp_x    = { sparse_x.attr("x") };
-        cpp11::integers sp_Dim = { sparse_x.attr("Dim") };
+        cpp11::doubles  sp_x    = { sparse_x.attr("x") };
+        cpp11::integers sp_Dim  = { sparse_x.attr("Dim") };
 
         if (!sp_Dim[1])
             throw std::invalid_argument("Invalid dimension for sparse matrix.");
