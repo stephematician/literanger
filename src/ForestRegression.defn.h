@@ -62,9 +62,9 @@ inline void ForestRegression::new_growth(
     }
     if (any_beta) {
         for (size_t j = 0; j != data->get_n_row(); ++j) {
-            if (data->get_y(j, 0) < 0 || data->get_y(j, 0) > 1)
+            if (data->get_y(j, 0) <= 0 || data->get_y(j, 0) >= 1)
                 throw std::domain_error("Beta log-likelihood metric requires "
-                    "regression data in the interval [0,1].");
+                    "regression data in the interval (0,1).");
         }
     }
 

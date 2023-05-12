@@ -66,7 +66,9 @@
 #' @param prediction_type Name of the prediction algorithm; "bagged" is the
 #' most-frequent value amongst in-bag samples for classification, or the mean of
 #' in-bag responses for regression; "inbag" predicts by drawing one in-bag
-#' response from a random tree for each row.
+#' response from a random tree for each row; "nodes" (currently unsupported)
+#' returns the node keys (ids) of the terminal node from every tree for each
+#' row.
 #' @param seed Random seed. Default is `NULL`, which generates the seed from
 #'   `R`. Set to `0` to ignore the `R` seed.
 #' @param n_thread Number of threads. Default is determined by system, typically

@@ -57,66 +57,6 @@
 #include "ForestRegression.h"
 
 
-/** Train a random forest
- *
- * @param[in] x The predictor data as a numeric matrix; each column is a
- * predictor and each row is an observation (or case).
- * @param[in] y The response data as a numeric matrix; usually a column vector
- * with one value per observation (or case), may be expanded to include survival
- * data (with censoring) in future.
- * @param[in] sparse_x Optional (set to NULL in R to disable); the predictor
- * data represented using a sparse matrix structure, same layout as in \p x, but
- * the underlying data structure more compactly represents matrices with lots of
- * zeros.
- * @param[in] predictor_names The names of the predictors; must have the same
- * length as the number of columns in @p x.
- * @param[in] names_of_unordered The names of the predictors that are treated
- * as unorderded, and hence split using a partition encoding.
- * @param[in] tree_type The type of tree in the forst - currently either
- * classification or regression.
- * @param[in] n_tree The number of trees in the forest.
- * @param[in] n_try The number of predictors to randomly draw as candidates when
- * splitting each node in the tree when training.
- * @param[in] split_rule The splitting rule used to select and evaluate
- * candidate values (of a predictor) when splitting.
- * @param[in] min_split_n_sample The smallest node to consider for splitting.
- * @param[in] max_depth The maximum depth of a tree in the forest.
- * @param[in] min_leaf_n_sample The smallest number of samples in a leaf node.
- * @param[in] replace Indicator for whether to draw with (or without)
- * replacement when generating the sample for training each tree.
- * @param[in] sample_fraction If scalar-valued; the fraction of data to sample
- * from when training each tree. If vector-valued, for classification trees
- * only, the fraction to sample by the response category.
- * @param[in] case_weights Optional (empty to disable); weights for each
- * observation (or case) to use when drawing the sample for training each tree.
- * The probability of selection is equal to the weight divided by the sum of all
- * weights.
- * @param[in] response_weights Optional (empty to disable); weights for each
- * response when evaluating the impurity-loss for each candidate split.
- * @param[in] draw_split_weights Optional (empty to disable); weights for each
- * predictor when drawing candidates for splitting (ignored for any predictor
- * that is always selected, see next argument). Either a list with one vector
- * that is used for all trees, or a list with a vector for each tree.
- * @param[in] names_of_always_split Option (empty to disable); the names of
- * predictors which are always selected as candidates for splitting.
- * @param[in] n_random_split Extratrees split metric only: the number of random
- * candidate-values to draw when splitting a node.
- * @param[in] alpha ...
- * @param[in] min_prop ...
- * @param[in] seed Seed used for pseudo-random number generators used in
- * training.
- * @param[in] save_memory Indicator for aggressively releasing memory and for
- * skipping building an index for the predictors (used to speed up training).
- * @param[in] n_thread Optional (one to disable): The number of threads to use
- * for growing (training) and predicting. If zero, then the number of threads
- * defaults to the number returned by `std::thread::hardware_concurrency`
- * @param[in] verbose Indicator for additional printed output while growing and
- * predicting.
- * @returns A list (in R) with
- * -   ``: ...
- * -   ``: ...
- * -   ``: ...
- */
 [[cpp11::register]]
 cpp11::list cpp11_train(
     cpp11::doubles_matrix<> x, cpp11::doubles_matrix<> y, cpp11::sexp sparse_x,

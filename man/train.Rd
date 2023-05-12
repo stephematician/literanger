@@ -81,7 +81,7 @@ tree-specific predictor-drawing weights; a list of size \code{n_tree} containing
 (non-negative) vectors with length equal to the number of predictors.}
 
 \item{names_of_always_draw}{Character vector with predictor (variable) names
-to be selected \emph{in addition} to the \code{n_try} predictors drawn as candidates tp
+to be selected \emph{in addition} to the \code{n_try} predictors drawn as candidates to
 split by.}
 
 \item{split_rule}{Splitting rule. For classification estimation "gini",
@@ -91,13 +91,12 @@ split by.}
 \item{max_depth}{Maximal tree depth. A value of NULL or 0 (the default)
 corresponds to unlimited depth, 1 to tree stumps (1 split per tree).}
 
-\item{min_split_n_sample}{Minimal node size. Default 1 for classification and
-5 for regression.}
+\item{min_split_n_sample}{Minimal number of in-bag samples a node must have
+in order to be split. Default 1 for classification and 5 for regression.}
 
-\item{min_leaf_n_sample}{Minimum number of (in bag) training samples in a
-leaf node.}
+\item{min_leaf_n_sample}{Minimum number of in-bag samples in a leaf node.}
 
-\item{response_weights}{Classification only: Weights for the respones classes
+\item{response_weights}{Classification only: Weights for the response classes
 (in order of the factor levels) in the splitting rule e.g. cost-sensitive
 learning. Weights are also used by each tree to determine majority vote.}
 
@@ -133,6 +132,7 @@ model.}
 \item{\code{n_try}}{The number of predictors drawn as candidates for each
 split.}
 \item{\code{split_rule}}{The name of the split metric used.}
+\item{\code{max_depth}}{The maximum allowed depth of a tree in the forest.}
 \item{\code{min_metric_decrease}}{The minimum decrease in the metric for an
 acceptable split (equal to negative 'alpha' for maximally selected
 rank statistics, else zero).}
@@ -140,7 +140,6 @@ rank statistics, else zero).}
 prior to splitting.}
 \item{\code{min_leaf_n_sample}}{The minumum number of in-bag samples in a leaf
 node.}
-\item{\code{max_depth}}{The maximum number of splits allowed plus one.}
 \item{\code{seed}}{The seed supplied to the C++ library.}
 \item{\code{oob_error}}{The misclassification rate or the mean square error
 using out-of-bag samples.}

@@ -28,6 +28,9 @@
  *-------------------------------------------------------------------------------
  */
 
+/* call declaration */
+#include "cpp11_predict.decl.h"
+
 /* standard library headers */
 #include <memory>
 #include <stdexcept>
@@ -53,29 +56,6 @@
 #include "ForestRegression.h"
 
 
-/** Fit a random forest
- *
- * @param[in] x The predictor data as a numeric matrix; each column is a
- * predictor and each row is an observation (or case).
- * @param[in] y The response data as a numeric matrix; usually a column vector
- * with one value per observation (or case), may be expanded to include survival
- * data (with censoring) in future.
- * @param[in] sparse_x Optional (set to NULL in R to disable); the predictor
- * data represented using a sparse matrix structure, same layout as in \p x, but
- * the underlying data structure more compactly represents matrices with lots of
- * zeros.
- * @param[in] seed Seed used for pseudo-random number generators used in
- * training.
- * @param[in] n_thread Optional (one to disable): The number of threads to use
- * for growing (training) and predicting. If zero, then the number of threads
- * defaults to the number returned by `std::thread::hardware_concurrency`
- * @param[in] verbose Indicator for additional printed output while growing and
- * predicting.
- * @returns A list (in R) with
- * -   ``: ...
- * -   ``: ...
- * -   ``: ...
- */
 [[cpp11::register]]
 cpp11::list cpp11_predict(
     cpp11::list object,

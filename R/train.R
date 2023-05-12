@@ -142,18 +142,17 @@
 #' tree-specific predictor-drawing weights; a list of size `n_tree` containing
 #' (non-negative) vectors with length equal to the number of predictors.
 #' @param names_of_always_draw Character vector with predictor (variable) names
-#' to be selected _in addition_ to the `n_try` predictors drawn as candidates tp
+#' to be selected _in addition_ to the `n_try` predictors drawn as candidates to
 #' split by.
 #' @param split_rule Splitting rule. For classification estimation "gini",
 #' "extratrees" or "hellinger" with default "gini". For regression "variance",
 #' "extratrees", "maxstat" or "beta" with default "variance".
 #' @param max_depth Maximal tree depth. A value of NULL or 0 (the default)
 #' corresponds to unlimited depth, 1 to tree stumps (1 split per tree).
-#' @param min_split_n_sample Minimal node size. Default 1 for classification and
-#' 5 for regression.
-#' @param min_leaf_n_sample Minimum number of (in bag) training samples in a
-#' leaf node.
-#' @param response_weights Classification only: Weights for the respones classes
+#' @param min_split_n_sample Minimal number of in-bag samples a node must have
+#' in order to be split. Default 1 for classification and 5 for regression.
+#' @param min_leaf_n_sample Minimum number of in-bag samples in a leaf node.
+#' @param response_weights Classification only: Weights for the response classes
 #' (in order of the factor levels) in the splitting rule e.g. cost-sensitive
 #' learning. Weights are also used by each tree to determine majority vote.
 #' @param n_random_split "extratrees" split metric only: Number of random splits
@@ -181,6 +180,7 @@
 #'   \item{`n_try`}{The number of predictors drawn as candidates for each
 #'     split.}
 #'   \item{`split_rule`}{The name of the split metric used.}
+#'   \item{`max_depth`}{The maximum allowed depth of a tree in the forest.}
 #'   \item{`min_metric_decrease`}{The minimum decrease in the metric for an
 #'     acceptable split (equal to negative 'alpha' for maximally selected
 #'     rank statistics, else zero).}
@@ -188,7 +188,6 @@
 #'     prior to splitting.}
 #'   \item{`min_leaf_n_sample`}{The minumum number of in-bag samples in a leaf
 #'     node.}
-#'   \item{`max_depth`}{The maximum number of splits allowed plus one.}
 #'   \item{`seed`}{The seed supplied to the C++ library.}
 #'   \item{`oob_error`}{The misclassification rate or the mean square error
 #'     using out-of-bag samples.}
@@ -341,9 +340,9 @@ train <- function(
 
     if (split_rule == "beta") {
         ## Check for 0..1 outcome
-        if (min(y) < 0 || max(y) > 1)
+        if (min(y) <= 0 || max(y) >= 1)
             stop("Beta log-likelihood metric applicable to regression data ",
-                 "with outcome between 0 and 1 only.")
+                 "in the interval (0,1).")
     } else if (split_rule == "hellinger" && ((is.factor(y) && nlevels(y) > 2) ||
                    (length(unique(y)) > 2)))
         stop("Hellinger split metric only implemented for binary classification.")

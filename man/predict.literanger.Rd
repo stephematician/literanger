@@ -24,7 +24,9 @@
 \item{prediction_type}{Name of the prediction algorithm; "bagged" is the
 most-frequent value amongst in-bag samples for classification, or the mean of
 in-bag responses for regression; "inbag" predicts by drawing one in-bag
-response from a random tree for each row.}
+response from a random tree for each row; "nodes" (currently unsupported)
+returns the node keys (ids) of the terminal node from every tree for each
+row.}
 
 \item{seed}{Random seed. Default is \code{NULL}, which generates the seed from
 \code{R}. Set to \code{0} to ignore the \code{R} seed.}
