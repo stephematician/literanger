@@ -43,7 +43,7 @@ struct TreeRegression: Tree<TreeRegression> {
          *
          */
         TreeRegression(const double min_prop,
-                       const TreeParameters & parameters, 
+                       const TreeParameters & parameters,
                        const bool save_memory);
 
         const std::unordered_map<size_t,dbl_vector> & get_leaf_values() const;
@@ -66,7 +66,7 @@ struct TreeRegression: Tree<TreeRegression> {
                                 result_type & result);
 
         template <PredictionType prediction_type, typename result_type,
-                  enable_if_doove<prediction_type> = nullptr>
+                  enable_if_inbag<prediction_type> = nullptr>
         void predict_from_inbag(const size_t node_key,
                                 result_type & result);
 

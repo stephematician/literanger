@@ -17,7 +17,7 @@ test_that("out-of-bag error same using sparse or non-sparse data for iris classi
     rf1 <- train(data=iris_sparse, response_name="Species", classification=T)
     set.seed(56)
     rf2 <- train(data=iris, response_name="Species")
-  
+
     expect_equal(rf1$oob_error, rf2$oob_error)
 })
 
@@ -40,7 +40,7 @@ test_that("out-of-bag error same with sparse data for binary classification", {
     rf1 <- train(data=dat_sparse, response_name="y", classification=T)
     set.seed(56)
     rf2 <- train(data=dat, response_name="y", classification=T)
-  
+
     expect_equal(rf1$oob_error, rf2$oob_error)
 })
 
@@ -62,7 +62,7 @@ test_that("out-of-bag error same with sparse data for 0/1 regression", {
     rf1 <- train(data=dat_sparse, response_name="y")
     set.seed(56)
     rf2 <- train(data=dat, response_name="y")
-  
+
     expect_equal(rf1$oob_error, rf2$oob_error)
 })
 
@@ -88,7 +88,7 @@ test_that("prediction same if training or testing data is sparse", {
   # to convert from sparse-data response to original response
     unique_species <- unique(iris$Species)
     species_map <- setNames(unique_species, as.integer(unique_species))
-  
+
     set.seed(42)
     rf1 <- train(data=dat_train, response_name="Species")
     pred1 <- predict(rf1, newdata=dat_test, seed=123)$values

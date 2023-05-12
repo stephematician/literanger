@@ -18,7 +18,7 @@ test_that("can have tree-wise weights for drawing predictors", {
                        simplify=F)
     expect_silent(train(data=iris, response_name="Species",
                         draw_predictor_weights =weights))
-  
+
     extra_weights <- c(weights, list(runif(ncol(iris)-1)))
     expect_error(
         train(data=iris, response_name="Species",

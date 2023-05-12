@@ -16,7 +16,7 @@ via Chained Equations' (Van Buuren 2007).
 
 Implementations of multiple imputation with random forests include:
 
-1.  [mice][mice_cran] which uses random forests to predict in a similar fashion
+1.  [`mice`][mice_cran] which uses random forests to predict in a similar fashion
     to [Doove et al, 2014][doove2014_doi], i.e. for each observation, a draw is
     taken from the sample of all values that belong to the the terminal node of
     a randomly drawn tree.
@@ -33,7 +33,7 @@ A more general advantage of this package is re-cycling of the trained forest
 object and the separation of the (training) data from the forest, see `ranger` [issue #304](https://github.com/imbs-hl/ranger/issues/304).
 
 A multiple imputation algorithm using this package is under development: called
-[smirf][smirf_github].
+[`smirf`][smirf_github].
 
 [mice_cran]: https://cran.r-project.org/package=MICE
 [miceranger_cran]: https://cran.r-project.org/package=miceRanger
@@ -64,14 +64,14 @@ table(pred.iris.bagged$values, pred.iris.inbag$values)
 
 ## Installation
 
-Installation is easy using [devtools][devtools_cran]:
+Installation is easy using [`devtools`][devtools_cran]:
 
 ```r
 library(devtools)
 install_github('stephematician/literanger')
 ```
 
-The [cpp11][cpp11_cran] package is also required, available on CRAN:
+The [`cpp11`][cpp11_cran] package is also required, available on CRAN:
 
 ```r
 install.packages('cpp11')
@@ -79,8 +79,6 @@ install.packages('cpp11')
 
 [cpp11_cran]: https://cran.r-project.org/package=cpp11
 [devtools_cran]: https://cran.r-project.org/package=devtools
-
-
 
 
 ## To-do

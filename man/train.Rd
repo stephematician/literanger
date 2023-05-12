@@ -164,10 +164,10 @@ Imputation via Chained Equations' (Van Buuren, 2007).
 literanger trains classification and regression forests using the original
 Random Forest (Breiman, 2001) or extremely randomized trees (Geurts et
 al, 2006) algorithms. The trained forest retains information about the in-bag
-responses in each terminal node, thus facilitating the algorithm for multiple
-imputation with random forests proposed by Doove et al (2014). This algorithm
-should match the predictive distribution more closely than using predictive
-mean matching.
+responses in each terminal node, thus facilitating a variation on the
+algorithm for multiple imputation with random forests proposed by Doove et
+al (2014). This algorithm should match the predictive distribution more
+closely than using predictive mean matching.
 
 The default split metric for classification trees is the Gini impurity, which
 can be extended to use the extra-randomized trees rule (Geurts et al, 2006).

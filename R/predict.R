@@ -33,16 +33,17 @@
 #' the 'bagged' prediction, the most frequent value (or the mean) of the in-bag
 #' samples in a terminal node. Doove et al (2014) propose a prediction that
 #' better matches the predictive distribution as needed for multiple imputation;
-#' take a random draw from the in-bag responses from a random tree in the forest
-#' for each predicted value needed. Alternatively, the usual most-frequent-value
-#' or mean of the in-bag responses can be used as in missForest (Stekhoven et
-#' al, 2014) or miceRanger <https://cran.r-project.org/package=miceRanger> and
-#' missRanger <https://cran.r-project.org/package=missRanger>.
+#' take a random draw from the observations in the terminal node from a randomly
+#' drawn tree in the forest for each predicted value needed. Alternatively, the
+#' usual most-frequent-value or mean of the in-bag responses can be used as in
+#' missForest (Stekhoven et al, 2014) or miceRanger
+#' <https://cran.r-project.org/package=miceRanger> and missRanger
+#' <https://cran.r-project.org/package=missRanger>.
 #'
 #' Forests trained by literanger retain information about the in-bag responses
-#' in each terminal node, thus facilitating their use within the multiple
-#' imputation with random forests proposed by Doove et al (2014). This type of
-#' prediction can be selected by setting `prediction_type="doove"`, or the usual
+#' in each terminal node, thus facilitating efficient predictions within a
+#' variation on multiple imputation proposed by Doove et al (2014). This type of
+#' prediction can be selected by setting `prediction_type="inbag"`, or the usual
 #' prediction for classification and regression forests, the most-frequent-value
 #' and mean of in bag samples respectively, is given by setting
 #' `prediction_type="bagged"`.
@@ -64,7 +65,7 @@
 #' `object$predictor_names` must be present.
 #' @param prediction_type Name of the prediction algorithm; "bagged" is the
 #' most-frequent value amongst in-bag samples for classification, or the mean of
-#' in-bag responses for regression; "doove" predicts by drawing one in-bag
+#' in-bag responses for regression; "inbag" predicts by drawing one in-bag
 #' response from a random tree for each row.
 #' @param seed Random seed. Default is `NULL`, which generates the seed from
 #'   `R`. Set to `0` to ignore the `R` seed.
@@ -110,7 +111,7 @@
 #' @export
 #' @md
 predict.literanger <- function(
-    object, newdata=NULL, prediction_type=c("bagged", "doove"),
+    object, newdata=NULL, prediction_type=c("bagged", "inbag", "nodes"),
     seed=sample.int(n=.Machine$integer.max, size=1),
     n_thread=0, verbose=F, ...
 ) {

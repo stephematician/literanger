@@ -5,7 +5,7 @@
  * The adaptation was performed by Stephen Wade in 2023. literanger carries the
  * same license, terms, and
  * permissions as ranger.
- * 
+ *
  * literanger is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -180,7 +180,7 @@ cpp11::list cpp11_train(
     );
 
     { const auto empty = std::shared_ptr<dbl_vector>(new dbl_vector());
-    
+
         for (size_t j = 0; j != n_tree; ++j) {
             std::shared_ptr<dbl_vector> draw_predictor_weights_j;
             switch (std_draw_predictor_weights.size()) {
@@ -267,7 +267,7 @@ cpp11::list cpp11_train(
     } break;
     default: throw std::invalid_argument("Unsupported tree type.");
     }
-  
+
 
   /* Now train the forest */
     const size_t plant_n_thread = n_thread == DEFAULT_N_THREAD ?

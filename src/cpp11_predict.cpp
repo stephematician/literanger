@@ -5,7 +5,7 @@
  * The adaptation was performed by Stephen Wade in 2023. literanger carries the
  * same license, terms, and
  * permissions as ranger.
- * 
+ *
  * literanger is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -146,13 +146,21 @@ cpp11::list cpp11_predict(
                                                  predictions, print_out);
             result.push_back({"values"_nm=predictions});
         } break;
-        case DOOVE: {
+        case INBAG: {
             dbl_vector predictions;
-            forest_impl.template predict<DOOVE>(data, seed, predict_n_thread,
+            forest_impl.template predict<INBAG>(data, seed, predict_n_thread,
                                                 user_interrupt,
                                                 predictions, print_out);
             result.push_back({"values"_nm=predictions});
-        } break; }
+        } break;
+       // case NODES: {
+       //     std::vector<key_vector> predictions;
+       //     forest_impl.template predict<NODES>(data, seed, predict_n_thread,
+       //                                         user_interrupt,
+       //                                         predictions, print_out);
+       //     result.push_back({"values"_nm=predictions});
+       // } break; }
+        default: throw std::invalid_argument("Unsupported prediction type."); }
 
     } break;
     case TREE_REGRESSION: {
@@ -165,13 +173,21 @@ cpp11::list cpp11_predict(
                                                  predictions, print_out);
             result.push_back({"values"_nm=predictions});
         } break;
-        case DOOVE: {
+        case INBAG: {
             dbl_vector predictions;
-            forest_impl.template predict<DOOVE>(data, seed, predict_n_thread,
+            forest_impl.template predict<INBAG>(data, seed, predict_n_thread,
                                                 user_interrupt,
                                                 predictions, print_out);
             result.push_back({"values"_nm=predictions});
-        } break; }
+        } break;
+       // case NODES: {
+       //     std::vector<key_vector> predictions;
+       //     forest_impl.template predict<NODES>(data, seed, predict_n_thread,
+       //                                         user_interrupt,
+       //                                         predictions, print_out);
+       //     result.push_back({"values"_nm=predictions});
+       // } break; }
+        default: throw std::invalid_argument("Unsupported prediction type."); }
 
     } break;
     default: throw std::invalid_argument("Unsupported tree type.");

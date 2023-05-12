@@ -5,7 +5,7 @@
  * The adaptation was performed by Stephen Wade in 2023. literanger carries the
  * same license, terms, and
  * permissions as ranger.
- * 
+ *
  * literanger is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -77,14 +77,14 @@ PtrT<std::vector<T>> as_vector_ptr(const FromT x);
 
 
 /** Convert a 'nested' container of cpp11 objects into vector<vector>.
- * 
+ *
  */
 template <typename T, typename NestedT, typename FromT>
 std::vector<std::vector<T>> as_nested(const FromT x);
 
 
 /** Convert a 'nested' container of cpp11 objects into vector<ptr<vector>>.
- * 
+ *
  */
 template <typename T, typename NestedT, typename FromT,
           template <typename...> class PtrT = std::shared_ptr>

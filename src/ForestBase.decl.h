@@ -116,7 +116,7 @@ struct ForestBase {
          * FIXME: This is used in place of RTTI to dynamically case for
          * prediction. */
         const TreeType tree_type;
- 
+
         /** Number of trees in forest. */
         const size_t n_tree;
 

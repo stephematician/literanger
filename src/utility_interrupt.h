@@ -18,7 +18,7 @@
 namespace literanger {
 
 /** An interrupt check operator
- * 
+ *
  * Defaults to never interrupted */
 struct interruptor { virtual bool operator()() const; };
 

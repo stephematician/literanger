@@ -71,7 +71,7 @@ struct TreeClassification : Tree<TreeClassification> {
                                 result_type & result);
 
         template <PredictionType prediction_type, typename result_type,
-                  enable_if_doove<prediction_type> = nullptr>
+                  enable_if_inbag<prediction_type> = nullptr>
         void predict_from_inbag(const size_t node_key,
                                 result_type & result);
 

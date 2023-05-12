@@ -129,10 +129,10 @@ struct ForestRegression : public Forest<ForestRegression> {
          * @tparam prediction_type The enumerated type of predictions to
          * calculate.
          * @tparam result_type The type for the returned data.
-         * @tparam enable_if_doove<prediction_type> Substitution success for
-         * PredictionType::DOOVE - enables partial specialisation. */
+         * @tparam enable_if_inbag<prediction_type> Substitution success for
+         * PredictionType::INBAG - enables partial specialisation. */
         template <PredictionType prediction_type, typename result_type,
-                  enable_if_doove<prediction_type> = nullptr>
+                  enable_if_inbag<prediction_type> = nullptr>
         void finalise_predictions(result_type & result);
 
         /** Calculate the predictions from one tree in the forest.
@@ -164,7 +164,7 @@ struct ForestRegression : public Forest<ForestRegression> {
         std::vector<dbl_vector> predictions_to_bag;
 
         /** A (workspace) container of indices of cases that will be predicted
-         * by each tree when prediction type is PredictionType::DOOVE. */
+         * by each tree when prediction type is PredictionType::INBAG. */
         std::vector<key_vector> prediction_keys_by_tree;
 
         /** Container for the final bagged (or otherwise) predictions. */

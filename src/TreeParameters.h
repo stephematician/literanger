@@ -130,7 +130,7 @@ inline TreeParameters::TreeParameters(
     const size_t n_try, const key_vector_ptr draw_always_predictor_keys,
     const dbl_vector_ptr draw_predictor_weights,
     const SplitRule split_rule, const double min_metric_decrease,
-    const size_t max_depth, const size_t min_split_n_sample, 
+    const size_t max_depth, const size_t min_split_n_sample,
     const size_t min_leaf_n_sample, const size_t n_random_split
 ) :
     n_predictor(n_predictor), is_ordered(is_ordered),

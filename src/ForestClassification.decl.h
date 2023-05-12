@@ -68,7 +68,7 @@ struct ForestClassification : public Forest<ForestClassification> {
          * If the sampling (for each tree's in-bag cases) is to be performed
          * response-wise, then a container is constructed which stores the
          * sample-keys by their response, managed by @p data.
-         * 
+         *
          * If ForestClassification::save_memory is false then, similarly, the
          * values of the predictors are mapped to an index which is managed by
          * the @p data object.
@@ -167,10 +167,10 @@ struct ForestClassification : public Forest<ForestClassification> {
          * @tparam prediction_type The enumerated type of predictions to
          * calculate.
          * @tparam result_type The type for the returned data.
-         * @tparam enable_if_doove<prediction_type> Substitution success for
-         * PredictionType::DOOVE - enables partial specialisation. */
+         * @tparam enable_if_inbag<prediction_type> Substitution success for
+         * PredictionType::INBAG - enables partial specialisation. */
         template <PredictionType prediction_type, typename result_type,
-                  enable_if_doove<prediction_type> = nullptr>
+                  enable_if_inbag<prediction_type> = nullptr>
         void finalise_predictions(result_type & result);
 
         /** Calculate the predictions from one tree in the forest.
@@ -194,7 +194,7 @@ struct ForestClassification : public Forest<ForestClassification> {
         const dbl_vector_ptr response_values;
 
         /** Weights of response values (classes) when computing node impurity.
-         * 
+         *
          * Same ordering as in ForestClassification::response_values. */
         const dbl_vector_ptr response_weights;
 
@@ -210,7 +210,7 @@ struct ForestClassification : public Forest<ForestClassification> {
         std::vector<key_vector> predictions_to_bag;
 
         /** A (workspace) container of indices of cases that will be predicted
-         * by each tree when prediction type is PredictionType::DOOVE. */
+         * by each tree when prediction type is PredictionType::INBAG. */
         std::vector<key_vector> prediction_keys_by_tree;
 
         /** Container for the final bagged (or otherwise) predictions. */

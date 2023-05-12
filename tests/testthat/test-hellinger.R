@@ -26,7 +26,7 @@ test_that("classification forest with non-factor response accepts split-rule", {
 
 test_that("error if response data has more than two classes", {
     expect_error(
-        train(data=iris, response_name="Species", split_rule="hellinger"), 
+        train(data=iris, response_name="Species", split_rule="hellinger"),
         "Hellinger split metric only implemented for binary classification.",
         fixed=T
     )

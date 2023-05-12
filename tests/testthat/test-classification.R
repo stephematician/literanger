@@ -32,7 +32,7 @@ test_that("can use matrix interface for training", {
 
 test_that("can use matrix interface for prediction", {
     expect_silent(predict(rg.mat, newdata=dat, prediction_type="bagged"))
-    # expect_output(predict(rg.mat, newdata=dat, prediction_type='doove'),
+    # expect_output(predict(rg.mat, newdata=dat, prediction_type="inbag"),
     #               regexp=predict_out_regex)
 })
 
@@ -45,12 +45,12 @@ test_that("can use save_memory option when training", {
 
 test_that("can omit response variable during prediction", {
     n <- 50
-  
+
     dt <- data.frame(x1=runif(n), x2=runif(n), y=factor(rbinom(n, 1, 0.5)))
     rf <- train(data=dt, response_name="y")
     expect_silent(predict(rf, newdata=dt))
     expect_silent(predict(rf, newdata=dt[, 1:2]))
-  
+
     dt2 <- data.frame(y=factor(rbinom(n, 1, 0.5)), x1=runif(n), x2=runif(n))
     rf <- train(data=dt2, response_name="y")
     expect_silent(predict(rf, dt2))
@@ -94,8 +94,8 @@ test_that("results using extratress split-rule differ from gini", {
 })
 
 test_that("training with numerically near-identical splits succeeds", {
-    dat <- data.frame(a = factor(1:2), 
-                      z = c(1.7629414498915687570246291215880773, 
+    dat <- data.frame(a = factor(1:2),
+                      z = c(1.7629414498915687570246291215880773,
                             1.7629414498915689790692340466193854))
     expect_silent(train(data=dat, response_name="a", n_thread=1, n_tree=1))
 })

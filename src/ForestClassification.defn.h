@@ -239,7 +239,7 @@ inline void ForestClassification::aggregate_one_item<BAGGED>(
 
 
 template <>
-inline void ForestClassification::new_predictions<DOOVE>(
+inline void ForestClassification::new_predictions<INBAG>(
     const std::shared_ptr<const Data> data, const size_t n_thread
 ) {
 
@@ -259,7 +259,7 @@ inline void ForestClassification::new_predictions<DOOVE>(
 
 
 template <PredictionType prediction_type, typename result_type,
-          enable_if_doove<prediction_type>>
+          enable_if_inbag<prediction_type>>
 void ForestClassification::finalise_predictions(
     result_type & result
 ) {
@@ -273,7 +273,7 @@ void ForestClassification::finalise_predictions(
 
 
 template <>
-inline void ForestClassification::predict_one_tree<DOOVE>(
+inline void ForestClassification::predict_one_tree<INBAG>(
     const size_t tree_key,
     const std::shared_ptr<const Data> data,
     const key_vector & sample_keys
@@ -292,7 +292,7 @@ inline void ForestClassification::predict_one_tree<DOOVE>(
     for (size_t item_key : prediction_keys_by_tree[tree_key]) {
         std::back_insert_iterator<key_vector> prediction_inserter =
             std::back_inserter(tree_predictions);
-        tree_impl.predict<DOOVE>(data, item_key, prediction_inserter);
+        tree_impl.predict<INBAG>(data, item_key, prediction_inserter);
     }
 
   /* Copy the predictions to aggregate-prediction container directly (the
@@ -310,7 +310,7 @@ inline void ForestClassification::predict_one_tree<DOOVE>(
 
 
 template <>
-inline void ForestClassification::aggregate_one_item<DOOVE>(
+inline void ForestClassification::aggregate_one_item<INBAG>(
     const size_t item_key
 ) { }
 

@@ -69,7 +69,7 @@ void TreeRegression::predict_from_inbag(
 
 
 template <PredictionType prediction_type, typename result_type,
-          enable_if_doove<prediction_type>>
+          enable_if_inbag<prediction_type>>
 void TreeRegression::predict_from_inbag(
     const size_t node_key,
     result_type & result

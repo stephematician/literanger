@@ -37,7 +37,8 @@ enum SplitRule { LOGRANK, MAXSTAT, EXTRATREES, BETA, HELLINGER };
 /** Enumerated types of prediction. */
 enum PredictionType {
     BAGGED, /**< Each predicted value is bootstrap-aggregated over all trees */
-    DOOVE   /**< Each predicted value comes from one randomly-sampled tree */
+    INBAG,  /**< Each predicted value comes from one randomly-sampled tree */
+    NODES   /**< Return terminal node-id for every tree */
 };
 
 
@@ -46,8 +47,12 @@ using enable_if_bagged =
     typename std::enable_if<prediction_type == BAGGED, std::nullptr_t>::type;
 
 template <PredictionType prediction_type>
-using enable_if_doove =
-    typename std::enable_if<prediction_type == DOOVE, std::nullptr_t>::type;
+using enable_if_inbag =
+    typename std::enable_if<prediction_type == INBAG, std::nullptr_t>::type;
+
+template <PredictionType prediction_type>
+using enable_if_nodes =
+    typename std::enable_if<prediction_type == NODES, std::nullptr_t>::type;
 
 
 /* Declarations */
@@ -59,7 +64,7 @@ TreeType as_tree_type(std::string x);
  * @param x e.g. "gini", "variance", etc. */
 SplitRule as_split_rule(std::string x);
 /** Convert a string to enumerated prediction type.
- * @param x "bagged" or "doove" only. */
+ * @param x "bagged", "inbag" or "nodes". */
 PredictionType as_prediction_type(std::string x);
 
 
@@ -107,7 +112,8 @@ inline PredictionType as_prediction_type(std::string x) {
 
     static std::unordered_map<std::string,PredictionType> table = {
         {"bagged", PredictionType::BAGGED},
-        {"doove", PredictionType::DOOVE}
+        {"inbag", PredictionType::INBAG},
+        {"nodes", PredictionType::NODES}
     };
 
     auto it = table.find(x);

@@ -9,13 +9,13 @@
 #' as 'Multiple Imputation via Chained Equations' (Van Buuren 2007).
 #'
 #' literanger trains classification and regression forests. The trained forest
-#' retains information about the in-bag responses in each terminal node, thus 
-#' facilitating their use within multiple imputation with random forests
-#' proposed by Doove et al (2014). This multiple imputation algorithm has
-#' better predictive distribution properties than competing approaches which
-#' use predictive mean matching. Alternatively, the usual bagged prediction may
-#' be used as in the imputation algorithm called 'missForest' (Stekhoven et
-#' al, 2014).
+#' retains information about the in-bag responses in each terminal node, thus
+#' facilitating computationally efficient prediction within multiple imputation
+#' with random forests proposed by Doove et al (2014). This multiple imputation
+#' algorithm has better predictive distribution properties than competing
+#' approaches which use predictive mean matching. Alternatively, the usual
+#' bagged prediction may be used as in the imputation algorithm called
+#' 'missForest' (Stekhoven et al, 2014).
 #'
 #' Classification and regression forests are implemented as in the original
 #' Random Forest (Breiman, 2001) or using extremely randomized trees (Geurts et
