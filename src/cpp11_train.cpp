@@ -266,12 +266,18 @@ void set_n_try(size_t & n_try, cpp11::strings predictor_names) {
 void set_min_split_n_sample(size_t & min_split_n_sample,
                             const literanger::TreeType tree_type) {
     using namespace literanger;
+    #if !defined(__GNUC__) || __GNUC__ >= 5
+      using umap_key_t = TreeType;
+    #else
+      using umap_key_t = size_t;
+    #endif
 
     if (min_split_n_sample != 0) return;
 
-    static std::unordered_map<TreeType,size_t> table = {
-        { TREE_CLASSIFICATION, DEFAULT_MIN_SPLIT_N_SAMPLE_CLASSIFICATION },
-        { TREE_REGRESSION, DEFAULT_MIN_SPLIT_N_SAMPLE_REGRESSION },
+    static std::unordered_map<umap_key_t,size_t> table = {
+        { TreeType::TREE_CLASSIFICATION,
+          DEFAULT_MIN_SPLIT_N_SAMPLE_CLASSIFICATION },
+        { TreeType::TREE_REGRESSION, DEFAULT_MIN_SPLIT_N_SAMPLE_REGRESSION }
     };
 
     min_split_n_sample = table[tree_type];
@@ -281,12 +287,18 @@ void set_min_split_n_sample(size_t & min_split_n_sample,
 void set_min_leaf_n_sample(size_t & min_leaf_n_sample,
                            const literanger::TreeType tree_type) {
     using namespace literanger;
+    #if !defined(__GNUC__) || __GNUC__ >= 5
+      using umap_key_t = TreeType;
+    #else
+      using umap_key_t = size_t;
+    #endif
 
     if (min_leaf_n_sample != 0) return;
 
-    static std::unordered_map<TreeType,size_t> table = {
-        { TREE_CLASSIFICATION, DEFAULT_MIN_LEAF_N_SAMPLE_CLASSIFICATION },
-        { TREE_REGRESSION, DEFAULT_MIN_LEAF_N_SAMPLE_REGRESSION },
+    static std::unordered_map<umap_key_t,size_t> table = {
+        { TreeType::TREE_CLASSIFICATION,
+          DEFAULT_MIN_LEAF_N_SAMPLE_CLASSIFICATION },
+        { TreeType::TREE_REGRESSION, DEFAULT_MIN_LEAF_N_SAMPLE_REGRESSION }
     };
 
     min_leaf_n_sample = table[tree_type];

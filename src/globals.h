@@ -27,7 +27,7 @@ namespace literanger {
 using count_vector = std::vector<size_t>;
 using key_vector = std::vector<size_t>;
 using dbl_vector = std::vector<double>;
-using ull_bitenc = std::bitset<std::numeric_limits<size_t>::digits>;
+using ull_bitenc = std::bitset<std::numeric_limits<unsigned long long>::digits>;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

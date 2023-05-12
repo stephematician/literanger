@@ -1,17 +1,17 @@
 
-test_that("Working if dependent variable has attributes other than names", {
+test_that("supports dependent variable has attributes other than names", {
     iris2 <- iris
     attr(iris2$Sepal.Width, "aaa") <- "bbb"
     expect_silent(train(data=iris2, response_name="Sepal.Width"))
 })
 
-test_that("Working if dependent variable is matrix with one column", {
+test_that("supports dependent variable is matrix with one column", {
     iris2 <- iris
     iris2$Sepal.Width = scale(iris$Sepal.Width)
     expect_silent(train(data=iris2, response_name="Sepal.Width"))
 })
 
-test_that("Same result with x/y interface, classification", {
+test_that("result same with x/y interface, classification", {
     set.seed(300)
     rf <- train(data=iris, response_name="Species")
     pred <- predict(rf, newdata=iris)
@@ -24,7 +24,7 @@ test_that("Same result with x/y interface, classification", {
     expect_equal(pred$values, pred_xy$values)
 })
 
-test_that("Same result with x/y interface, regression", {
+test_that("result same with x/y interface, regression", {
     set.seed(300)
     rf <- train(data=iris, response_name="Sepal.Length")
     pred <- predict(rf, newdata=iris)
@@ -53,7 +53,7 @@ test_that("column order does not change prediction", {
 
 if (requireNamespace("tibble", quietly=TRUE)) tb <- tibble::as_tibble(iris)
 
-test_that("training works with tibbles, alternative interface", {
+test_that("training works with tibbles", {
     skip_if_not_installed("tibble")
     rf1 <- train(data=tb, response_name="Species", seed=1)
     pred1tb <- predict(rf1, newdata=tb, seed=2)

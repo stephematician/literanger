@@ -107,7 +107,7 @@ forests for high dimensional data in C++ and R. _Journal of Statistical
 Software, 77_(i01), pp. 1-17.
 [doi:10.18637/jss.v077.i01](https://doi.org/10.18637/jss.v077.i01).
 
-[brieman2001_doi]: https://doi.org/10.1016/j.csda.2013.10.025
+[brieman2001_doi]: https://doi.org/10.1023/A:1010933404324
 [doove2014_doi]: https://doi.org/10.1016/j.csda.2013.10.025
 [wright2017_doi]: https://doi.org/10.18637/jss.v077.i01
 

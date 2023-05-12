@@ -24,14 +24,16 @@ test_that("out-of-bag error same using sparse or non-sparse data for iris classi
 test_that("prediction same using sparse data for iris classification", {
     skip_if_not_installed("Matrix")
     set.seed(56)
-    rf1 <- train(data=iris_sparse, response_name="Species", classification=T)
+    rf <- train(data=iris, response_name="Species")
+    pred <- predict(rf, newdata=iris, seed=123)$values
     set.seed(56)
-    rf2 <- train(data=iris, response_name="Species")
-    pred1 <- factor(predict(rf1, newdata=iris_sparse)$values,
-                    levels=rf2$response_values,
-                    labels=rf2$response_levels)
-    pred2 <- predict(rf2, newdata=iris)$values
-    expect_equal(pred1, pred2)
+    rf_sparse <- train(data=iris_sparse, response_name="Species",
+                       classification=T)
+    pred_sparse <- predict(rf_sparse, newdata=iris_sparse, seed=123)$values
+    pred_sparse <- factor(pred_sparse,
+                          levels=rf$response_values,
+                          labels=rf$response_levels)
+    expect_equal(pred, pred_sparse)
 })
 
 test_that("out-of-bag error same with sparse data for binary classification", {
@@ -47,13 +49,12 @@ test_that("out-of-bag error same with sparse data for binary classification", {
 test_that("prediction same with sparse data for binary classification", {
     skip_if_not_installed("Matrix")
     set.seed(56)
-    rf1 <- train(data=dat_sparse, response_name="y", classification=T)
+    rf_sparse <- train(data=dat_sparse, response_name="y", classification=T)
+    pred_sparse <- predict(rf_sparse, newdata=dat_sparse, seed=123)$values
     set.seed(56)
-    rf2 <- train(data=dat, response_name="y", classification=T)
-
-    pred1 <- predict(rf1, newdata=dat_sparse, seed=123)$values
-    pred2 <- predict(rf2, newdata=dat, seed=123)$values
-    expect_equal(pred1, pred2)
+    rf <- train(data=dat, response_name="y", classification=T)
+    pred <- predict(rf, newdata=dat)$values
+    expect_equal(pred, pred_sparse)
 })
 
 test_that("out-of-bag error same with sparse data for 0/1 regression", {
@@ -69,13 +70,12 @@ test_that("out-of-bag error same with sparse data for 0/1 regression", {
 test_that("prediction same with sparse data for 0/1 regression", {
     skip_if_not_installed("Matrix")
     set.seed(56)
-    rf1 <- train(data=dat_sparse, response_name="y")
+    rf_sparse <- train(data=dat_sparse, response_name="y")
+    pred_sparse <- predict(rf_sparse, newdata=dat_sparse, seed=123)$values
     set.seed(56)
-    rf2 <- train(data=dat, response_name="y")
-
-    pred1 <- predict(rf1, newdata=dat_sparse, seed=123)$values
-    pred2 <- predict(rf2, newdata=dat, seed=123)$values
-    expect_equal(pred1, pred2)
+    rf <- train(data=dat, response_name="y")
+    pred <- predict(rf, newdata=dat, seed=123)$values
+    expect_equal(pred, pred_sparse)
 })
 
 test_that("prediction same if training or testing data is sparse", {

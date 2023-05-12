@@ -1,6 +1,4 @@
-# literanger 0.0.0.9000
-
-To be released as 0.0.1
+# literanger 0.0.1
 
 This is the initial release of literanger, a refactoring and adaptation of the
 ranger package <https://github.com/imbs-hl/ranger> for random forests. The
@@ -14,11 +12,7 @@ _Computational statistics & data analysis_, 72, 92-104.
 
 Currently supports:
 
--   Classification and regression trees/forests
+-   Classification and regression trees/forests.
 -   Bagged prediction or prediction given by drawing from a random tree and a
     random in-bag value.
-
-
-
-
 

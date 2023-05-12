@@ -1,6 +1,6 @@
 Package: literanger
 Title: Random forests for multiple imputation based on 'ranger'
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R:
     person("Stephen",
            "Wade",
