@@ -1,6 +1,8 @@
 literanger: A fast implementation of random forests for multiple imputation
 ===========================================================================
 
+![R-CMD-Check](https://github.com/stephematician/literanger/actions/workflows/check-standard.yaml/badge.svg)
+
 _Stephen Wade_
 
 🚧 Under construction 🚧

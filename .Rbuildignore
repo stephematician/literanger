@@ -5,3 +5,4 @@ winlibs/
 .vscode/
 
 cran-comments.md
+^\.github$
