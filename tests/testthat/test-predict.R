@@ -20,8 +20,10 @@ test_that("can use case weights", {
 test_that("result is independent of column ordering", {
     dat <- iris[, c(1:2, 5, 3:4)]
     rf <- train(data=dat, response_name="Species")
-    pred1 <- predict(rf, newdata=iris, seed=123)$values
-    pred2 <- predict(rf, newdata=dat, seed=123)$values
+    set.seed(42)
+    pred1 <- predict(rf, newdata=iris)$values
+    set.seed(42)
+    pred2 <- predict(rf, newdata=dat)$values
     expect_equal(pred1, pred2)
     expect_gte(mean(pred2 == dat$Species), 0.9)
   ## No response column

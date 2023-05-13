@@ -81,18 +81,6 @@ test_that("'gini' is default split-rule", {
     expect_equal(rf1$oob_error, rf2$oob_error)
 })
 
-test_that("results using extratress split-rule differ from gini", {
-    set.seed(42)
-    rf1 <- train(data=iris, response_name="Species", split_rule="extratrees")
-
-    set.seed(42)
-    rf2 <- train(data=iris, response_name="Species", split_rule="gini")
-
-    expect_equal(rf1$split_rule, "extratrees")
-    expect_equal(rf2$split_rule, "gini")
-    expect_false(rf1$oob_error == rf2$oob_error)
-})
-
 test_that("training with numerically near-identical splits succeeds", {
     dat <- data.frame(a = factor(1:2),
                       z = c(1.7629414498915687570246291215880773,

@@ -25,11 +25,11 @@ test_that("prediction same using sparse data for iris classification", {
     skip_if_not_installed("Matrix")
     set.seed(56)
     rf <- train(data=iris, response_name="Species")
-    pred <- predict(rf, newdata=iris, seed=123)$values
+    pred <- predict(rf, newdata=iris)$values
     set.seed(56)
     rf_sparse <- train(data=iris_sparse, response_name="Species",
                        classification=T)
-    pred_sparse <- predict(rf_sparse, newdata=iris_sparse, seed=123)$values
+    pred_sparse <- predict(rf_sparse, newdata=iris_sparse)$values
     pred_sparse <- factor(pred_sparse,
                           levels=rf$response_values,
                           labels=rf$response_levels)
@@ -50,11 +50,11 @@ test_that("prediction same with sparse data for binary classification", {
     skip_if_not_installed("Matrix")
     set.seed(56)
     rf_sparse <- train(data=dat_sparse, response_name="y", classification=T)
-    pred_sparse <- predict(rf_sparse, newdata=dat_sparse, seed=123)$values
+    pred_sparse <- predict(rf_sparse, newdata=dat_sparse)
     set.seed(56)
     rf <- train(data=dat, response_name="y", classification=T)
-    pred <- predict(rf, newdata=dat)$values
-    expect_equal(pred, pred_sparse)
+    pred <- predict(rf, newdata=dat)
+    expect_equal(pred$values, pred_sparse$values)
 })
 
 test_that("out-of-bag error same with sparse data for 0/1 regression", {
@@ -71,10 +71,10 @@ test_that("prediction same with sparse data for 0/1 regression", {
     skip_if_not_installed("Matrix")
     set.seed(56)
     rf_sparse <- train(data=dat_sparse, response_name="y")
-    pred_sparse <- predict(rf_sparse, newdata=dat_sparse, seed=123)$values
+    pred_sparse <- predict(rf_sparse, newdata=dat_sparse)$values
     set.seed(56)
     rf <- train(data=dat, response_name="y")
-    pred <- predict(rf, newdata=dat, seed=123)$values
+    pred <- predict(rf, newdata=dat)$values
     expect_equal(pred, pred_sparse)
 })
 
@@ -91,17 +91,21 @@ test_that("prediction same if training or testing data is sparse", {
 
     set.seed(42)
     rf1 <- train(data=dat_train, response_name="Species")
-    pred1 <- predict(rf1, newdata=dat_test, seed=123)$values
-    pred1_sparse <- predict(rf1, newdata=test_sparse, seed=123)$values
+    set.seed(57)
+    pred1 <- predict(rf1, newdata=dat_test)$values
+    set.seed(57)
+    pred1_sparse <- predict(rf1, newdata=test_sparse)$values
 
     set.seed(42)
     rf2 <- train(data=train_sparse, response_name="Species", classification=T)
+    set.seed(57)
     pred2 <- factor(
-        unname(species_map[predict(rf2, newdata=dat_test, seed=123)$values]),
+        unname(species_map[predict(rf2, newdata=dat_test)$values]),
         levels=levels(iris$Species)
     )
+    set.seed(57)
     pred2_sparse <- factor(
-        unname(species_map[predict(rf2, newdata=test_sparse, seed=123)$values]),
+        unname(species_map[predict(rf2, newdata=test_sparse)$values]),
         levels=levels(iris$Species)
     )
 

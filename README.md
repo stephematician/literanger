@@ -18,10 +18,10 @@ via Chained Equations' (Van Buuren 2007).
 
 Implementations of multiple imputation with random forests include:
 
-1.  [`mice`][mice_cran] which uses random forests to predict in a similar fashion
-    to [Doove et al, 2014][doove2014_doi], i.e. for each observation, a draw is
-    taken from the sample of all values that belong to the the terminal node of
-    a randomly drawn tree.
+1.  [`mice`][mice_cran] which uses random forests to predict in a similar
+    fashion to [Doove et al, 2014][doove2014_doi], i.e. for each observation, a
+    draw is taken from the sample of all values that belong to the the terminal
+    node of a randomly drawn tree.
 2.  [`miceRanger`][miceranger_cran] and [`missRanger`][missranger_cran] which
     use predictive mean matching.
 
@@ -32,7 +32,8 @@ scales with the number of missing values, rather than with the product of the
 size of the whole dataset and the number of trees (as in `mice`).
 
 A more general advantage of this package is re-cycling of the trained forest
-object and the separation of the (training) data from the forest, see `ranger` [issue #304](https://github.com/imbs-hl/ranger/issues/304).
+object and the separation of the (training) data from the forest, see `ranger`
+[issue #304](https://github.com/imbs-hl/ranger/issues/304).
 
 A multiple imputation algorithm using this package is under development: called
 [`smirf`][smirf_github].

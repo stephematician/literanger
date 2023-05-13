@@ -125,9 +125,6 @@
 #' response is numeric (including if data is a matrix), else, a regression
 #' forest is grown.
 #' @param n_tree Number of trees (default 10).
-#' @param unordered_predictors Handling of unordered factor predictors. One of
-#' "ignore", "order" and "partition". For the "extratrees" splitting rule the
-#' default is "partition" for all other splitting rules "ignore".
 #' @param replace Sample with replacement to train each tree.
 #' @param sample_fraction Fraction of observations to sample to train each tree.
 #' Default is 1 for sampling with replacement and 0.632 for sampling without
@@ -152,6 +149,9 @@
 #' @param min_split_n_sample Minimal number of in-bag samples a node must have
 #' in order to be split. Default 1 for classification and 5 for regression.
 #' @param min_leaf_n_sample Minimum number of in-bag samples in a leaf node.
+#' @param unordered_predictors Handling of unordered factor predictors. One of
+#' "ignore", "order" and "partition". For the "extratrees" splitting rule the
+#' default is "partition" for all other splitting rules "ignore".
 #' @param response_weights Classification only: Weights for the response classes
 #' (in order of the factor levels) in the splitting rule e.g. cost-sensitive
 #' learning. Weights are also used by each tree to determine majority vote.
@@ -161,8 +161,9 @@
 #' splitting, default is 0.5.
 #' @param min_prop "maxstat" splitting rule only: Lower quantile of covariate
 #' distribution to be considered for splitting, default is 0.1.
-#' @param seed Random seed. Default is `NULL`, which generates the seed from
-#' R. Set to `0` to ignore the R seed.
+#' @param seed Random seed, an integer between 1 and `.Machine$integer.max`.
+#' Default generates the seed from `R`, set to `0` to ignore the `R` seed and
+#' use a C++ `std::random_device`.
 #' @param save_memory Use memory saving (but slower) splitting mode. Warning:
 #' This option slows down the tree growing, use only if you encounter memory
 #' problems.
@@ -258,14 +259,14 @@ train <- function(
     x=NULL, y=NULL,
     case_weights=numeric(),
     classification=NULL, n_tree=10,
-    unordered_predictors=NULL,
     replace=T, sample_fraction=ifelse(replace, 1, 0.632),
     n_try=NULL,
     draw_predictor_weights=numeric(), names_of_always_draw=character(),
     split_rule=NULL, max_depth=0, min_split_n_sample=0, min_leaf_n_sample=0,
+    unordered_predictors=NULL,
     response_weights=numeric(),
     n_random_split=1, alpha=0.5, min_prop=0.1,
-    seed=sample.int(n=.Machine$integer.max, size=1),
+    seed=1L + sample.int(n=.Machine$integer.max - 1L, size=1),
     save_memory=F, n_thread=0, verbose=F
 ) {
 
@@ -326,6 +327,102 @@ train <- function(
     if (n_predictor < 1)
         stop("No predictors found - missing column names?")
 
+  # Case weights: NULL for no weights or all weights equal
+    if (length(unique(case_weights)) == 1) case_weights <- numeric()
+
+  # Number of trees
+    if (!is.numeric(n_tree) || n_tree < 1) stop("Invalid value for 'n_tree'.")
+
+  # Sample fraction
+    if (!is.numeric(sample_fraction))
+        stop("Invalid value for 'sample_fraction'. Please give a value in ",
+             "(0,1] or a vector of values in [0,1].")
+
+  # n_try as a function
+    if (is.function(n_try)) {
+
+        if (length(formals(n_try)) > 1)
+            stop("'n_try' function must have exactly one argument.")
+
+      # Evaluate function
+        n_try <- try(n_try(n_predictor), silent=T)
+
+        if (inherits(n_try, "try-error")) {
+            message("The 'n_try' function produced the error: ", n_try)
+            stop("'n_try' function evaluation resulted in an error.")
+        }
+
+      # Check for a single numeric
+        if (!is.numeric(n_try) || length(n_try) != 1) {
+            stop("'n_try' function must return a single integer or numeric.")
+        } else
+            n_try <- as.integer(n_try)
+
+      # Check for limits
+        if (n_try < 1 || n_try > n_predictor)
+            stop("'n_try' function must evaluate to a value not less ",
+                 "than 1 and not greater than the number of predictors ( = ",
+                 n_predictor, " ).")
+    }
+
+  # Check (numeric or otherwise) n_try
+    if (is.null(n_try)) {
+        n_try <- 0
+    } else if (!is.numeric(n_try) || n_try < 0)
+        stop("Invalid value for 'n_try'.")
+
+    if (length(sample_fraction) > 1) {
+
+        if (!(tree_type %in% "classification"))
+            stop("Invalid value for 'sample_fraction'. Vector values only ",
+                 "valid for classification forests.")
+        if (any(sample_fraction < 0) || any(sample_fraction > 1))
+            stop("Invalid value for 'sample_fraction'. Please give a value in ",
+                 "(0,1] or a vector of values in [0,1].")
+        if (length(sample_fraction) != nlevels(y))
+            stop("Invalid value for 'sample_fraction'. Expecting ", nlevels(y),
+                 " values, provided ", length(sample_fraction), ".")
+        if (!replace & any(sample_fraction * length(y) > table(y))) {
+            j <- which(sample_fraction * length(y) > table(y))[1]
+            stop("Not enough samples in class ", names(j),
+                 "; available: ", table(y)[j],
+                 ", requested: ", (sample_fraction * length(y))[j], ".")
+        }
+        if (!identical(case_weights, numeric()))
+            stop("Combination of 'case_weights' argument and class-wise ",
+                 "sampling not supported.")
+        # Fix order (C++ needs in order as classes appear in data)
+        sample_fraction <- sample_fraction[as.numeric(unique(y))]
+
+    } else if (sample_fraction <= 0 || sample_fraction > 1) {
+        stop("Invalid value for 'sample_fraction'. Please give a value in ",
+             "(0,1] or a vector of values in [0,1].")
+    } else if(!replace && length(case_weights) > 0 &&
+                  sum(case_weights > 0) < sample_fraction * nrow(x))
+        stop("Fewer non-zero case weights than observations to sample.")
+
+  # Split select weights: NULL for no weights
+    if (identical(draw_predictor_weights, numeric())) {
+        draw_predictor_weights <- list()
+    } else if (is.numeric(draw_predictor_weights)) {
+        if (length(draw_predictor_weights) != n_predictor)
+        stop("Size of 'draw_predictor_weights' (numeric) not equal to number ",
+             "of predictors.")
+        draw_predictor_weights <- list(draw_predictor_weights)
+    } else if (is.list(draw_predictor_weights)) {
+        if (length(draw_predictor_weights) != n_tree)
+            stop("Size of 'draw_predictor_weights' (list) not equal to number ",
+                 "of trees.")
+        if (!all(sapply(draw_predictor_weights, length) == n_predictor))
+            stop("One or more vectors in 'draw_predictor_weights' (list) has ",
+                 "size not equal to number of predictors.")
+    } else stop("Invalid weighting for 'draw_predictor_weights'.")
+
+    missing_always_draw <- setdiff(names_of_always_draw, predictor_names)
+    if (length(missing_always_draw) > 0)
+        stop("Always drawn variable(s) not found in data: ",
+             paste(missing_always_draw, collapse=", "), ".")
+
   # Split rule
     if (is.null(split_rule))
         split_rule <- c("classification"="gini",
@@ -350,6 +447,18 @@ train <- function(
   # Importance mode
   #  importance_mode <- match.arg(importance_mode)
 
+  # Minumum node size
+    if (!is.numeric(min_split_n_sample) || min_split_n_sample < 0)
+        stop("Invalid value for 'min_split_n_sample'.")
+
+  # Tree depth
+    if (!is.numeric(max_depth) || max_depth < 0)
+        stop("Invalid value for 'max_depth'.")
+
+  # Minumum node size
+    if (!is.numeric(min_leaf_n_sample) || min_leaf_n_sample < 0)
+        stop("Invalid value for 'min_leaf_n_sample'.")
+
   # Respect unordered factors
     if (split_rule %in% "extratrees") {
         unordered_predictors <- match.arg(
@@ -361,7 +470,17 @@ train <- function(
         )
     }
 
-  # Recode characters as factors and recode factors if "order" mode
+    if (split_rule == "extratrees" && save_memory &&
+            unordered_predictors == "partition")
+        stop("'save_memory' option not possible in extra trees with ",
+             "unordered predictors.")
+
+    if (unordered_predictors == "order" && tree_type == "regression" &&
+            split_rule == "maxstat")
+      warning("The 'order' mode for unordered factor handling with the ",
+              "'maxstat' splitrule is experimental.")
+
+ # Recode characters as factors and recode factors if "order" mode
     predictor_levels <- NULL
     if (!is.matrix(x) && !inherits(x, "Matrix") && ncol(x) > 0) {
         character_ind <- sapply(x, is.character)
@@ -398,152 +517,6 @@ train <- function(
         if (any(sapply(x, is.factor))) predictor_levels <- lapply(x, levels)
     }
 
-  # Number of trees
-    if (!is.numeric(n_tree) || n_tree < 1) stop("Invalid value for 'n_tree'.")
-
-  # n_try as a function
-    if (is.function(n_try)) {
-
-        if (length(formals(n_try)) > 1)
-            stop("'n_try' function must have exactly one argument.")
-
-      # Evaluate function
-        n_try <- try(n_try(n_predictor), silent=T)
-
-        if (inherits(n_try, "try-error")) {
-            message("The 'n_try' function produced the error: ", n_try)
-            stop("'n_try' function evaluation resulted in an error.")
-        }
-
-      # Check for a single numeric
-        if (!is.numeric(n_try) || length(n_try) != 1) {
-            stop("'n_try' function must return a single integer or numeric.")
-        } else
-            n_try <- as.integer(n_try)
-
-      # Check for limits
-        if (n_try < 1 || n_try > n_predictor)
-            stop("'n_try' function must evaluate to a value not less ",
-                 "than 1 and not greater than the number of predictors ( = ",
-                 n_predictor, " ).")
-    }
-
-  # Check (numeric or otherwise) n_try
-    if (is.null(n_try)) {
-        n_try <- 0
-    } else if (!is.numeric(n_try) || n_try < 0)
-        stop("Invalid value for 'n_try'.")
-
-  # Num threads; default 0 => detect from system in C++.
-    if (!is.numeric(n_thread) || n_thread < 0)
-        stop("Invalid value for 'n_thread'.")
-
-  # Minumum node size
-    if (!is.numeric(min_split_n_sample) || min_split_n_sample < 0)
-        stop("Invalid value for 'min_split_n_sample'.")
-
-  # Tree depth
-    if (!is.numeric(max_depth) || max_depth < 0)
-        stop("Invalid value for 'max_depth'.")
-
-  # Minumum node size
-    if (!is.numeric(min_leaf_n_sample) || min_leaf_n_sample < 0)
-        stop("Invalid value for 'min_leaf_n_sample'.")
-
-  # Sample fraction
-    if (!is.numeric(sample_fraction))
-        stop("Invalid value for 'sample_fraction'. Please give a value in ",
-             "(0,1] or a vector of values in [0,1].")
-
-    if (length(sample_fraction) > 1) {
-
-        if (!(tree_type %in% "classification"))
-            stop("Invalid value for 'sample_fraction'. Vector values only ",
-                 "valid for classification forests.")
-        if (any(sample_fraction < 0) || any(sample_fraction > 1))
-            stop("Invalid value for 'sample_fraction'. Please give a value in ",
-                 "(0,1] or a vector of values in [0,1].")
-        if (length(sample_fraction) != nlevels(y))
-            stop("Invalid value for 'sample_fraction'. Expecting ", nlevels(y),
-                 " values, provided ", length(sample_fraction), ".")
-        if (!replace & any(sample_fraction * length(y) > table(y))) {
-            j <- which(sample_fraction * length(y) > table(y))[1]
-            stop("Not enough samples in class ", names(j),
-                 "; available: ", table(y)[j],
-                 ", requested: ", (sample_fraction * length(y))[j], ".")
-        }
-        if (!identical(case_weights, numeric()))
-            stop("Combination of 'case_weights' argument and class-wise ",
-                 "sampling not supported.")
-        # Fix order (C++ needs in order as classes appear in data)
-        sample_fraction <- sample_fraction[as.numeric(unique(y))]
-
-    } else if (sample_fraction <= 0 || sample_fraction > 1)
-        stop("Invalid value for 'sample_fraction'. Please give a value in ",
-             "(0,1] or a vector of values in [0,1].")
-
-  # Case weights: NULL for no weights or all weights equal
-    if (length(unique(case_weights)) == 1) {
-        case_weights <- numeric()
-    } else if (!replace && sum(case_weights > 0) < sample_fraction * nrow(x))
-        stop("Fewer non-zero case weights than observations to sample.")
-
-  # Class weights: NULL for no weights (all 1)
-    if (identical(response_weights, numeric())) {
-        if (is.factor(y)) {
-            response_weights <- rep(1, nlevels(droplevels(y)))
-        } else
-            response_weights <- rep(1, length(unique(y)))
-    } else {
-        if (!(tree_type %in% "classification"))
-            stop("'response_weights' argument only valid for classification ",
-                 "forests.")
-        if (!is.numeric(response_weights) || any(response_weights < 0))
-            stop("Invalid value for 'response_weights'. Please give a vector ",
-                 "of non-negative values.")
-        if (length(response_weights) != length(unique(as.numeric(y))))
-            stop("Number of response weights not equal to number of classes.")
-
-        ## Reorder (C++ expects order as appearing in the data)
-        response_weights <- response_weights[unique(as.numeric(y))]
-    }
-
-  # Split select weights: NULL for no weights
-    if (identical(draw_predictor_weights, numeric())) {
-        draw_predictor_weights <- list()
-    } else if (is.numeric(draw_predictor_weights)) {
-        if (length(draw_predictor_weights) != n_predictor)
-        stop("Size of 'draw_predictor_weights' (numeric) not equal to number ",
-             "of predictors.")
-        draw_predictor_weights <- list(draw_predictor_weights)
-    } else if (is.list(draw_predictor_weights)) {
-        if (length(draw_predictor_weights) != n_tree)
-            stop("Size of 'draw_predictor_weights' (list) not equal to number ",
-                 "of trees.")
-        if (!all(sapply(draw_predictor_weights, length) == n_predictor))
-            stop("One or more vectors in 'draw_predictor_weights' (list) has ",
-                 "size not equal to number of predictors.")
-    } else stop("Invalid weighting for 'draw_predictor_weights'.")
-
-  # Maxstat splitting
-    if (alpha < 0 || alpha > 1)
-        stop("Invalid value for 'alpha', please give a value in [0,1].")
-
-    if (min_prop < 0 || min_prop > 0.5)
-        stop("Invalid value for 'min_prop', please give a value in [0,0.5].")
-
-  # Extra trees
-    if (!is.numeric(n_random_split) || n_random_split < 1)
-        stop("Invalid value for 'n_random_split', please give a positive ",
-             "integer.")
-    if (split_rule == "extratrees" && save_memory &&
-            unordered_predictors == "partition")
-        stop("'save_memory' option not possible in extra trees with ",
-             "unordered predictors.")
-    if (n_random_split > 1 && split_rule != "extratrees")
-        warning("Argument 'n_random_split' ignored if 'split_rule' is not ",
-                "'extratrees'.")
-
     if (unordered_predictors == "partition") {
         ordered_idx <- sapply(x, is.ordered)
         factor_idx <- sapply(x, is.factor)
@@ -569,10 +542,48 @@ train <- function(
         stop("Unordered factor splitting not implemented for 'maxstat' or ",
              "'beta' splitting rule.")
 
-    if (unordered_predictors == "order" && tree_type == "regression" &&
-            split_rule == "maxstat")
-      warning("The 'order' mode for unordered factor handling with the ",
-              "'maxstat' splitrule is experimental.")
+  # Class weights: NULL for no weights (all 1)
+    if (identical(response_weights, numeric())) {
+        if (is.factor(y)) {
+            response_weights <- rep(1, nlevels(droplevels(y)))
+        } else
+            response_weights <- rep(1, length(unique(y)))
+    } else {
+        if (!(tree_type %in% "classification"))
+            stop("'response_weights' argument only valid for classification ",
+                 "forests.")
+        if (!is.numeric(response_weights) || any(response_weights < 0))
+            stop("Invalid value for 'response_weights'. Please give a vector ",
+                 "of non-negative values.")
+        if (length(response_weights) != length(unique(as.numeric(y))))
+            stop("Number of response weights not equal to number of classes.")
+
+        ## Reorder (C++ expects order as appearing in the data)
+        response_weights <- response_weights[unique(as.numeric(y))]
+    }
+
+  # Extra trees number of random splits
+    if (!is.numeric(n_random_split) || n_random_split < 1)
+        stop("Invalid value for 'n_random_split', please give a positive ",
+             "integer.")
+
+    if (n_random_split > 1 && split_rule != "extratrees")
+        warning("Argument 'n_random_split' ignored if 'split_rule' is not ",
+                "'extratrees'.")
+
+  # Maxstat splitting
+    if (alpha < 0 || alpha > 1)
+        stop("Invalid value for 'alpha', please give a value in [0,1].")
+
+    if (min_prop < 0 || min_prop > 0.5)
+        stop("Invalid value for 'min_prop', please give a value in [0,0.5].")
+
+    if (round(seed) != seed) warning("Rounding 'seed' to nearest integer.")
+    seed <- as.integer(round(seed))
+
+  # Num threads; default 0 => detect from system in C++.
+    if (!is.numeric(n_thread) || n_thread < 0)
+        stop("Invalid value for 'n_thread'.")
 
   # Use sparse matrix
     if (inherits(x, "dgCMatrix")) {

@@ -8,7 +8,7 @@
   object,
   newdata = NULL,
   prediction_type = c("bagged", "inbag", "nodes"),
-  seed = sample.int(n = .Machine$integer.max, size = 1),
+  seed = 1L + sample.int(n = .Machine$integer.max - 1L, size = 1),
   n_thread = 0,
   verbose = F,
   ...
@@ -28,8 +28,9 @@ response from a random tree for each row; "nodes" (currently unsupported)
 returns the node keys (ids) of the terminal node from every tree for each
 row.}
 
-\item{seed}{Random seed. Default is \code{NULL}, which generates the seed from
-\code{R}. Set to \code{0} to ignore the \code{R} seed.}
+\item{seed}{Random seed, an integer between 1 and \code{.Machine$integer.max}.
+Default generates the seed from \code{R}, set to \code{0} to ignore the \code{R} seed and
+use a C++ \code{std::random_device}.}
 
 \item{n_thread}{Number of threads. Default is determined by system, typically
 the number of cores.}
@@ -44,6 +45,7 @@ Object of class \code{literanger.prediction} with elements:
 \item{\code{values}}{Predicted (drawn) classes/value for classification and
 regression.}
 \item{\code{tree_type}}{Number of trees.}
+\item{\code{seed}}{The seed supplied to the C++ library.}
 }
 }
 \description{

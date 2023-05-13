@@ -126,7 +126,7 @@ test_that("can train regression forest when single-level predictor is re-ordered
     )
 })
 
-test_that("same result when training forests if no unordered factors", {
+test_that("result same when training forests if no unordered factors", {
     set.seed(100)
     rf1.class <- train(data=iris, response_name="Species",
                        unordered_predictors="ignore")

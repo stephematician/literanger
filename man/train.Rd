@@ -13,7 +13,6 @@ train(
   case_weights = numeric(),
   classification = NULL,
   n_tree = 10,
-  unordered_predictors = NULL,
   replace = T,
   sample_fraction = ifelse(replace, 1, 0.632),
   n_try = NULL,
@@ -23,11 +22,12 @@ train(
   max_depth = 0,
   min_split_n_sample = 0,
   min_leaf_n_sample = 0,
+  unordered_predictors = NULL,
   response_weights = numeric(),
   n_random_split = 1,
   alpha = 0.5,
   min_prop = 0.1,
-  seed = sample.int(n = .Machine$integer.max, size = 1),
+  seed = 1L + sample.int(n = .Machine$integer.max - 1L, size = 1),
   save_memory = F,
   n_thread = 0,
   verbose = F
@@ -58,10 +58,6 @@ response is numeric (including if data is a matrix), else, a regression
 forest is grown.}
 
 \item{n_tree}{Number of trees (default 10).}
-
-\item{unordered_predictors}{Handling of unordered factor predictors. One of
-"ignore", "order" and "partition". For the "extratrees" splitting rule the
-default is "partition" for all other splitting rules "ignore".}
 
 \item{replace}{Sample with replacement to train each tree.}
 
@@ -96,6 +92,10 @@ in order to be split. Default 1 for classification and 5 for regression.}
 
 \item{min_leaf_n_sample}{Minimum number of in-bag samples in a leaf node.}
 
+\item{unordered_predictors}{Handling of unordered factor predictors. One of
+"ignore", "order" and "partition". For the "extratrees" splitting rule the
+default is "partition" for all other splitting rules "ignore".}
+
 \item{response_weights}{Classification only: Weights for the response classes
 (in order of the factor levels) in the splitting rule e.g. cost-sensitive
 learning. Weights are also used by each tree to determine majority vote.}
@@ -109,8 +109,9 @@ splitting, default is 0.5.}
 \item{min_prop}{"maxstat" splitting rule only: Lower quantile of covariate
 distribution to be considered for splitting, default is 0.1.}
 
-\item{seed}{Random seed. Default is \code{NULL}, which generates the seed from
-R. Set to \code{0} to ignore the R seed.}
+\item{seed}{Random seed, an integer between 1 and \code{.Machine$integer.max}.
+Default generates the seed from \code{R}, set to \code{0} to ignore the \code{R} seed and
+use a C++ \code{std::random_device}.}
 
 \item{save_memory}{Use memory saving (but slower) splitting mode. Warning:
 This option slows down the tree growing, use only if you encounter memory

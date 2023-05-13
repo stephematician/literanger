@@ -16,13 +16,15 @@ test_that("prediction accuracy for minority class increases with higher weight",
     dat <- data.frame(y=y, x)
     is_minor <- dat$y == "1"
 
+    set.seed(42)
     rf <- train(data=dat, response_name="y", min_split_n_sample=50,
-                response_weights=c(1, 1), seed=1)
+                response_weights=c(1, 1))
     pred <- predict(rf, newdata=dat[is_minor,])
     accuracy_minor <- mean(pred$values == 1, na.rm=T)
 
+    set.seed(42)
     rf_wtd <- train(data=dat, response_name="y", min_split_n_sample=50,
-                    response_weights=c(0.01, 0.99), seed=1)
+                    response_weights=c(0.01, 0.99))
     pred_wtd <- predict(rf_wtd, newdata=dat[is_minor,])
     accuracy_minor_wtd <- mean(pred_wtd$values == 1, na.rm=T)
 

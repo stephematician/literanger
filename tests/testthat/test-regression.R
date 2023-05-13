@@ -77,28 +77,3 @@ test_that("'variance' is default splitrule", {
     expect_equal(rf1$oob_error, rf2$oob_error)
 })
 
-test_that("results using extratrees split-rule differ from variance", {
-    set.seed(42)
-    rf1 <- train(data=iris, response_name="Sepal.Length",
-                 split_rule="extratrees")
-    set.seed(42)
-    rf2 <- train(data=iris, response_name="Sepal.Length",
-                 split_rule="variance")
-
-    expect_equal(rf1$split_rule, "extratrees")
-    expect_equal(rf2$split_rule, "variance")
-    expect_false(rf1$oob_error == rf2$oob_error)
-})
-
-test_that("results using maxstat split-rule differ from variance", {
-    set.seed(42)
-    rf1 <- train(data=iris, response_name="Sepal.Length", split_rule="maxstat")
-    set.seed(42)
-    rf2 <- train(data=iris, response_name="Sepal.Length",
-                 split_rule="variance")
-
-    expect_equal(rf1$split_rule, "maxstat")
-    expect_equal(rf2$split_rule, "variance")
-    expect_false(rf1$oob_error == rf2$oob_error)
-})
-

@@ -10,12 +10,14 @@ y <- (y - min_y) / (max_y - min_y)
 dat <- data.frame(y = y, x)
 
 test_that("regression forest accepts beta log-likelihood metric", {
-    rf <- train(data=dat, response_name="y", split_rule="beta", seed=1)
+    set.seed(42)
+    rf <- train(data=dat, response_name="y", split_rule="beta")
     expect_is(rf, "literanger")
 })
 
 test_that("regression forest with beta log-likelihood metric has acceptable out-of-bag error", {
-    rf <- train(data=dat, response_name="y", split_rule="beta", seed=1)
+    set.seed(42)
+    rf <- train(data=dat, response_name="y", split_rule="beta")
     expect_lt(rf$oob_error, 0.2)
 })
 

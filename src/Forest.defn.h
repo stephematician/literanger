@@ -90,27 +90,27 @@ void Forest<ImplT>::plant(const std::shared_ptr<const Data> data,
     {
         std::uniform_int_distribution<size_t> U_rng { };
         for (size_t j = 0; j != n_tree; ++j) {
-            size_t seed_j;
-            seed_j = seed == 0 ? U_rng(gen) : (j + 1) * seed;
+            const size_t seed_j = seed == 0 ? U_rng(gen) : (j + 1) * seed;
             trees[j]->seed_gen(seed_j);
         }
     }
 
+    const size_t n_grow_thread = std::min(n_tree, n_thread);
   /* Set the ranges for the threads */
-    equal_split(work_intervals, 0, n_tree - 1, n_thread);
+    equal_split(work_intervals, 0, n_tree - 1, n_grow_thread);
 
     interrupted = false;
     event_count = 0;
 
     std::vector<std::future<void>> work_result;
-    work_result.reserve(n_thread);
+    work_result.reserve(n_grow_thread);
 
     forest_impl.new_growth(data);
 
-    if (compute_oob_error) forest_impl.new_oob_error(data, n_thread);
+    if (compute_oob_error) forest_impl.new_oob_error(data, n_grow_thread);
 
   /* Start growing trees in threads */
-    for (size_t work_index = 0; work_index != n_thread; ++work_index)
+    for (size_t work_index = 0; work_index != n_grow_thread; ++work_index)
         work_result.push_back(std::async(
             std::launch::async,
             &Forest<ImplT>::grow_interval,
@@ -119,7 +119,7 @@ void Forest<ImplT>::plant(const std::shared_ptr<const Data> data,
         );
 
   /* Block until all tree-growth threads have finished */
-    show_progress("Growing trees...", n_tree, n_thread,
+    show_progress("Growing trees...", n_tree, n_grow_thread,
                   user_interrupt, print_out);
     for (auto & result : work_result) { result.wait(); result.get(); }
 
@@ -149,58 +149,43 @@ void Forest<ImplT>::predict(const std::shared_ptr<const Data> data,
     {
         std::uniform_int_distribution<size_t> U_rng { };
         for (size_t j = 0; j != n_tree; ++j) {
-            size_t seed_j;
-            seed_j = seed == 0 ? U_rng(gen) : (j + 1) * seed;
+            const size_t seed_j = seed == 0 ? U_rng(gen) : (j + 1) * seed;
             trees[j]->seed_gen(seed_j); //
         }
     }
 
   /* Set the ranges for the threads */
     const size_t n_predict_call = n_tree;
-    equal_split(work_intervals, 0, n_predict_call - 1, n_thread);
+    const size_t n_predict_thread = std::min(n_predict_call, n_thread);
+    equal_split(work_intervals, 0, n_predict_call - 1, n_predict_thread);
 
     interrupted = false;
     event_count = 0;
 
     std::vector<std::future<void>> work_result;
-    work_result.reserve(n_thread);
+    work_result.reserve(n_predict_thread);
 
   /* Initialise a workspace for predictions */
-    forest_impl.template new_predictions<prediction_type>(data, n_thread);
+    forest_impl.template new_predictions<prediction_type>(data,
+                                                          n_predict_thread);
 
   /* Generate and store predictions for each tree */
-    for (size_t work_index = 0; work_index != n_thread; ++work_index)
+    for (size_t work_index = 0; work_index != n_predict_thread; ++work_index)
         work_result.push_back(std::async(
             std::launch::async,
             &Forest<ImplT>::predict_interval<prediction_type>,
             this, work_index, data)
         );
 
-    show_progress("Predicting...", n_predict_call, n_thread,
+    show_progress("Predicting...", n_predict_call, n_predict_thread,
                   user_interrupt, print_out);
     for (auto & result : work_result) { result.wait(); result.get(); }
 
     if (interrupted) throw std::runtime_error("User interrupt.");
 
   /* Aggregate over trees for each observation/sample */
-    const size_t n_aggregate_call = data->get_n_row();
-    equal_split(work_intervals, 0, n_aggregate_call - 1, n_thread);
-
-    work_result.clear();
-    event_count = 0;
-
-    for (size_t work_index = 0; work_index != n_thread; ++work_index)
-        work_result.push_back(std::async(
-            std::launch::async,
-            &Forest<ImplT>::aggregate_interval<prediction_type>,
-            this, work_index)
-        );
-
-    show_progress("Aggregating predictions...", n_aggregate_call, n_thread,
-                  user_interrupt, print_out);
-    for (auto & result : work_result) { result.wait(); result.get(); }
-
-    if (interrupted) throw std::runtime_error("User interrupt.");
+    for (size_t item_key = 0; item_key != data->get_n_row(); ++item_key)
+        forest_impl.template aggregate_one_item<prediction_type>(item_key);
 
   /* Clean up the workspace and return the prediction. */
     forest_impl.template finalise_predictions<prediction_type>(result);
@@ -266,33 +251,6 @@ void Forest<ImplT>::predict_interval(
         forest_impl.template predict_one_tree<prediction_type>(
             tree_key, data, sample_keys
         );
-
-        std::unique_lock<std::mutex> lock(mutex);
-        if (interrupted) { condition_variable.notify_one(); return; }
-        ++event_count;
-        condition_variable.notify_one();
-
-    }
-
-    END_WORKER
-}
-
-
-template <typename ImplT>
-template <PredictionType prediction_type>
-void Forest<ImplT>::aggregate_interval(const size_t work_index) {
-    BEGIN_WORKER
-
-    ImplT & forest_impl = *(static_cast<ImplT*>(this));
-
-    const size_t start = work_intervals[work_index];
-    const size_t end = work_intervals[work_index + 1];
-
-    if (work_index >= work_intervals.size() - 1) return;
-
-    for (size_t item_key = start; item_key != end; ++item_key) {
-
-        forest_impl.template aggregate_one_item<prediction_type>(item_key);
 
         std::unique_lock<std::mutex> lock(mutex);
         if (interrupted) { condition_variable.notify_one(); return; }

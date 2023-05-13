@@ -69,8 +69,9 @@
 #' response from a random tree for each row; "nodes" (currently unsupported)
 #' returns the node keys (ids) of the terminal node from every tree for each
 #' row.
-#' @param seed Random seed. Default is `NULL`, which generates the seed from
-#'   `R`. Set to `0` to ignore the `R` seed.
+#' @param seed Random seed, an integer between 1 and `.Machine$integer.max`.
+#' Default generates the seed from `R`, set to `0` to ignore the `R` seed and
+#' use a C++ `std::random_device`.
 #' @param n_thread Number of threads. Default is determined by system, typically
 #' the number of cores.
 #' @param verbose Show computation status and estimated runtime.
@@ -81,6 +82,7 @@
 #'   \item{`values`}{Predicted (drawn) classes/value for classification and
 #'     regression.}
 #'   \item{`tree_type`}{Number of trees.}
+#'   \item{`seed`}{The seed supplied to the C++ library.}
 #' }
 #'
 #' @examples
@@ -114,7 +116,7 @@
 #' @md
 predict.literanger <- function(
     object, newdata=NULL, prediction_type=c("bagged", "inbag", "nodes"),
-    seed=sample.int(n=.Machine$integer.max, size=1),
+    seed=1L + sample.int(n=.Machine$integer.max - 1L, size=1),
     n_thread=0, verbose=F, ...
 ) {
 
@@ -176,6 +178,9 @@ predict.literanger <- function(
 
     prediction_type <- match.arg(prediction_type)
 
+    if (round(seed) != seed) warning("Rounding 'seed' to nearest integer.")
+    seed <- as.integer(round(seed))
+
   # Num threads; default 0 => detect from system in C++.
     if (!is.numeric(n_thread) || n_thread < 0)
         stop("Invalid value for 'n_thread'")
@@ -199,6 +204,7 @@ predict.literanger <- function(
     if (length(result) == 0) stop("User interrupt or internal error.")
 
     result$tree_type <- object$tree_type
+    result$seed <- seed
 
     if (is.numeric(result$values) && !is.null(object$response_levels))
         result$values <- factor(result$values,
