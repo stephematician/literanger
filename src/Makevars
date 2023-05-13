@@ -1,2 +1,15 @@
-CXX_STD = CXX11
+# CXX_STD = CXX14
+
+# downloads eigen3 to extlibs/ and sets include location
+PKG_CPPFLAGS = -I../src -I../extlibs/
+
+.PHONY: all clean extlibs
+
+all: extlibs $(SHLIB)
+
+extlibs:
+	"${R_HOME}/bin${R_ARCH_BIN}/Rscript" "../tools/extlibs.R"
+
+clean:
+	rm -f $(SHLIB) $(OBJECTS)
 

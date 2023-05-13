@@ -1,4 +1,4 @@
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # This file is part of 'literanger'. literanger was adapted from the 'ranger'
 # package for R statistical software. ranger was authored by Marvin N Wright
 # with the GNU General Public License version 3. The adaptation was performed by
@@ -24,7 +24,7 @@
 #   Cancer Council New South Wales
 #   Woolloomooloo NSW 2011
 #   Australia
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 #' Literanger prediction
 #'
@@ -49,10 +49,10 @@
 #' `prediction_type="bagged"`.
 #'
 #' A list is returned. The `values` item contains the predicted classes or
-#' values (classification and regression forests, respecitvely). Factor levels
+#' values (classification and regression forests, respectively). Factor levels
 #' are returned as factors with the levels as per the original training data.
 #'
-#' Compared to the original package 'ranger', literanger excludes certain
+#' Compared to the original package ranger, literanger excludes certain
 #' features:
 #'
 #' -   Probability, survival, and quantile regression forests.
@@ -64,7 +64,7 @@
 #' (Matrix), for the latter two; must have column names; all predictors named in
 #' `object$predictor_names` must be present.
 #' @param prediction_type Name of the prediction algorithm; "bagged" is the
-#' most-frequent value amongst in-bag samples for classification, or the mean of
+#' most-frequent value among in-bag samples for classification, or the mean of
 #' in-bag responses for regression; "inbag" predicts by drawing one in-bag
 #' response from a random tree for each row; "nodes" (currently unsupported)
 #' returns the node keys (ids) of the terminal node from every tree for each
@@ -77,7 +77,7 @@
 #' @param verbose Show computation status and estimated runtime.
 #' @param ... Ignored.
 #'
-#' @return Object of class `literanger.prediction` with elements:
+#' @return Object of class `literanger_prediction` with elements:
 #' \describe{
 #'   \item{`values`}{Predicted (drawn) classes/value for classification and
 #'     regression.}
@@ -87,15 +87,21 @@
 #'
 #' @examples
 #' ## Classification forest
-#' train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
-#' iris.train <- iris[train.idx, ]
-#' iris.test <- iris[-train.idx, ]
-#' rg.iris <- train(data=iris.train, response_name="Species")
-#' pred.iris <- predict(rg.iris, newdata=iris.test)
-#' table(iris.test$Species, pred.iris$values)
+#' train_idx <- sample(nrow(iris), 2/3 * nrow(iris))
+#' iris_train <- iris[ train_idx, ]
+#' iris_test  <- iris[-train_idx, ]
+#' rf_iris <- train(data=iris_train, response_name="Species")
+#' pred_iris_bagged <- predict(rf_iris, newdata=iris_test,
+#'                             prediction_type="bagged")
+#' pred_iris_inbag  <- predict(rf_iris, newdata=iris_test,
+#'                             prediction_type="inbag")
+#' # compare bagged vs actual test values
+#' table(iris_test$Species, pred_iris_bagged$values)
+#' # compare bagged prediction vs in-bag draw
+#' table(pred_iris_bagged$values, pred_iris_inbag$values)
 #'
 #' @author Stephen Wade <stephematician@gmail.com>, Marvin N Wright (original
-#' 'ranger' package)
+#' ranger package)
 #'
 #' @references
 #'
@@ -106,9 +112,9 @@
 #' -   Stekhoven, D.J. and Buehlmann, P. (2012). MissForest--non-parametric
 #'     missing value imputation for mixed-type data. _Bioinformatics_, 28(1),
 #'     112-118. \doi{10.1093/bioinformatics/btr597}.
-#' -   Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of
-#'     Random Forests for High Dimensional Data in C++ and R. J Stat Softw
-#'     77:1-17. \doi{10.18637/jss.v077.i01}.
+#' -   Wright, M. N., & Ziegler, A. (2017a). ranger: A Fast Implementation of
+#'     Random Forests for High Dimensional Data in C++ and R. _Journal of
+#'     Statistical Software_, 77, 1-17. \doi{10.18637/jss.v077.i01}.
 #'
 #' @seealso \code{\link{train}}
 #'
@@ -117,7 +123,7 @@
 predict.literanger <- function(
     object, newdata=NULL, prediction_type=c("bagged", "inbag", "nodes"),
     seed=1L + sample.int(n=.Machine$integer.max - 1L, size=1),
-    n_thread=0, verbose=F, ...
+    n_thread=0, verbose=FALSE, ...
 ) {
 
     if (is.null(newdata))
@@ -137,7 +143,7 @@ predict.literanger <- function(
 
     if (!identical(x_names, predictor_names)) {
         if (!is_df) {
-            x <- x[, predictor_names, drop=F]
+            x <- x[, predictor_names, drop=FALSE]
         } else {
             x <- x[predictor_names]
         }
@@ -164,7 +170,7 @@ predict.literanger <- function(
                         "during training")
                 factor(x_j, levels=union(levels_j, levels(x_j)), exclude=NULL)
             },
-            x[factor_ind], predictor_levels[factor_ind], SIMPLIFY=F
+            x[factor_ind], predictor_levels[factor_ind], SIMPLIFY=FALSE
         )
 
     }
@@ -173,7 +179,7 @@ predict.literanger <- function(
     if (any(is.na(x))) {
         offending_columns <- predictor_names[colSums(is.na(x)) > 0]
         stop("Missing values in the predictors: ",
-             paste0(offending_columns, collapse = ", "), ".", call.=F)
+             paste0(offending_columns, collapse = ", "), ".", call.=FALSE)
     }
 
     prediction_type <- match.arg(prediction_type)
@@ -195,6 +201,7 @@ predict.literanger <- function(
         if (storage.mode(x) %in% "integer") storage.mode(x) <- "double"
     }
 
+  # Call the library's prediction function using cpp11
     result <- cpp11_predict(
         object, x, sparse_x,
         prediction_type, seed, n_thread,
@@ -211,7 +218,7 @@ predict.literanger <- function(
                                 levels=seq_along(object$response_levels),
                                 labels=object$response_levels)
 
-    class(result) <- "literanger.prediction"
+    class(result) <- "literanger_prediction"
 
     invisible(result)
 

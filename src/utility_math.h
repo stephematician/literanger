@@ -34,7 +34,7 @@ inline double beta_log_likelihood(double y, double mu, double nu) {
         const double eps = std::numeric_limits<double>::epsilon();
         y = std::max(eps, std::min(1 - eps, y));
         mu = std::max(eps, std::min(1 - eps, mu));
-        nu = std::max(eps, std::min(1 - eps, nu));
+        nu = std::max(eps,  nu);
     }
     double lgamma_result;
   /* FIXME: For now, we lock as lgamma isn't thread-safe */
@@ -43,7 +43,7 @@ inline double beta_log_likelihood(double y, double mu, double nu) {
             std::lgamma((1 - mu) * nu); }
 
     return lgamma_result + (mu * nu - 1) * std::log(y) +
-        ((1 - mu) * nu - 1) * std::log(1 - y);
+        ((1 - mu) * nu - 1) * std::log1p(-y);
 
 }
 

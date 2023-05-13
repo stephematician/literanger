@@ -2,8 +2,9 @@
 % Please edit documentation in R/literanger-package.R
 \docType{package}
 \name{literanger-package}
+\alias{literanger}
 \alias{literanger-package}
-\title{\pkg{literanger}: Random forests for multiple imputation algorithms.}
+\title{\pkg{literanger}: Random Forests for Multiple Imputation based on 'ranger'.}
 \description{
 'literanger' is an adaption of the 'ranger' R package for training and
 predicting from random forest models within multiple imputation algorithms.
@@ -11,7 +12,7 @@ ranger is a fast implementation of random forests (Breiman, 2001) or
 recursive partitioning, particularly suited for high dimensional data
 (Wright et al, 2017a). literanger enables random forests to be embedded in
 the fully conditional specification framework for multiple imputation known
-as 'Multiple Imputation via Chained Equations' (Van Buuren 2007).
+as "Multiple Imputation via Chained Equations" (Van Buuren 2007).
 }
 \details{
 literanger trains classification and regression forests. The trained forest
@@ -25,7 +26,7 @@ bagged prediction may be used as in the imputation algorithm called
 
 Classification and regression forests are implemented as in the original
 Random Forest (Breiman, 2001) or using extremely randomized trees (Geurts et
-al, 2006). "data.frame", "matrix", and sparse matrices ("dgCmatrix") are
+al, 2006). 'data.frame', 'matrix', and sparse matrices ('dgCmatrix') are
 supported.
 
 Split selection may be based on improvement in metrics such as the variance,
@@ -42,22 +43,22 @@ see 'missRanger' \url{https://cran.r-project.org/package=missRanger} and
 'miceRanger' \url{https://cran.r-project.org/package=miceRanger}, which use
 predictive mean matching combined with the original 'ranger' algorithm.
 
-This package was adapted from the "ranger" package for R Statistical
+This package was adapted from the 'ranger' package for R Statistical
 Software. The C++ core is provided under the same license terms as the
 original C++ core in the 'ranger' package, namely the MIT license
 \url{https://www.r-project.org/Licenses/MIT}. The wrappers in this package around
 the core are licensed under the same terms of the corresponding components in
 the 'ranger' R package, namely the GPL3 license
-\url{https://www.r-project.org/Licenses/GPL-3}, \url{http:://www.gnu.org/licenses}.
+\url{https://www.r-project.org/Licenses/GPL-3}, \url{http://www.gnu.org/licenses/}.
 }
 \section{License}{
-literanger was adapted from the 'ranger' package for R statistical software.
-ranger was authored by Marvin N. Wright with the GNU General Public License
-version 3 for the R package (interface), while the C++ core of ranger has the
-MIT license. The adaptation was performed by Stephen Wade in 2023. literanger
-carries the same license, terms, and permissions as ranger, including the GNU
-General Public License 3 for the R package interface, and the MIT license for
-the C++ core.
+'literanger' was adapted from the 'ranger' package for R statistical
+software. ranger was authored by Marvin N. Wright with the GNU General Public
+License version 3 for the R package (interface), while the C++ core of ranger
+has the MIT license. The adaptation was performed by Stephen Wade in 2023.
+literanger carries the same license, terms, and permissions as ranger,
+including the GNU General Public License 3 for the R package interface, and
+the MIT license for the C++ core.
 
 License statement for C++ core of ranger:
 
@@ -125,8 +126,8 @@ effects. \emph{Computational Statistics & Data Analysis}, 72, 92-104.
 missing value imputation for mixed-type data. \emph{Bioinformatics}, 28(1),
 112-118. \doi{10.1093/bioinformatics/btr597}.
 \item Van Buuren, S. (2007). Multiple imputation of discrete and continuous
-data by fully conditional specification. _Statistical Methods in Medical
-Research, 16(3), 219-242. \doi{10.1177/0962280206074463}.
+data by fully conditional specification. \emph{Statistical Methods in Medical
+Research}, 16(3), 219-242. \doi{10.1177/0962280206074463}.
 \item Weinhold, L., Schmid, M., Wright, M. N., & Berger, M. (2019). A random
 forest approach for modeling bounded outcomes. \emph{arXiv preprint},
 arXiv:1901.06211. \doi{10.48550/arXiv.1901.06211}.
@@ -143,3 +144,4 @@ rank statistics. \emph{Statistics in medicine}, 36(8), 1272-1284.
 Stephen Wade \href{mailto:stephematician@gmail.com}{stephematician@gmail.com}, Marvin N Wright (original
 'ranger' package)
 }
+\keyword{internal}

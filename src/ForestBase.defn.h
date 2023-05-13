@@ -20,7 +20,6 @@
 
 /* standard library headers */
 #include <algorithm>
-#include <cassert>
 #include <chrono>
 #include <ctime>   /* localtime */
 /* put_time is not available in GCC < 5*/

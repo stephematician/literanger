@@ -13,7 +13,7 @@ train(
   case_weights = numeric(),
   classification = NULL,
   n_tree = 10,
-  replace = T,
+  replace = TRUE,
   sample_fraction = ifelse(replace, 1, 0.632),
   n_try = NULL,
   draw_predictor_weights = numeric(),
@@ -28,9 +28,9 @@ train(
   alpha = 0.5,
   min_prop = 0.1,
   seed = 1L + sample.int(n = .Machine$integer.max - 1L, size = 1),
-  save_memory = F,
+  save_memory = FALSE,
   n_thread = 0,
-  verbose = F
+  verbose = FALSE
 )
 }
 \arguments{
@@ -104,10 +104,11 @@ learning. Weights are also used by each tree to determine majority vote.}
 to consider for each candidate splitting variable, default is 1.}
 
 \item{alpha}{"maxstat" splitting rule only: Significance threshold to allow
-splitting, default is 0.5.}
+splitting, default is 0.5, must be in the interval \verb{(0,1]}.}
 
 \item{min_prop}{"maxstat" splitting rule only: Lower quantile of covariate
-distribution to be considered for splitting, default is 0.1.}
+distribution to be considered for splitting, default is 0.1, must be in the
+interval \verb{[0,0.5]}.}
 
 \item{seed}{Random seed, an integer between 1 and \code{.Machine$integer.max}.
 Default generates the seed from \code{R}, set to \code{0} to ignore the \code{R} seed and
@@ -135,11 +136,11 @@ split.}
 \item{\code{split_rule}}{The name of the split metric used.}
 \item{\code{max_depth}}{The maximum allowed depth of a tree in the forest.}
 \item{\code{min_metric_decrease}}{The minimum decrease in the metric for an
-acceptable split (equal to negative 'alpha' for maximally selected
+acceptable split (equal to negative @p alpha for maximally selected
 rank statistics, else zero).}
 \item{\code{min_split_n_sample}}{The minimum number of in-bag samples in a node
 prior to splitting.}
-\item{\code{min_leaf_n_sample}}{The minumum number of in-bag samples in a leaf
+\item{\code{min_leaf_n_sample}}{The minimum number of in-bag samples in a leaf
 node.}
 \item{\code{seed}}{The seed supplied to the C++ library.}
 \item{\code{oob_error}}{The misclassification rate or the mean square error
@@ -157,8 +158,8 @@ in the order they appear in the data.}
 via an adaptation of the 'ranger' R package. ranger is a fast
 implementation of random forests (Breiman, 2001) or recursive partitioning,
 particularly suited for high dimensional data (Wright et al, 2017a).
-literanger supports prediction used in algorithms such as 'Multiple
-Imputation via Chained Equations' (Van Buuren, 2007).
+literanger supports prediction used in algorithms such as "Multiple
+Imputation via Chained Equations" (Van Buuren, 2007).
 }
 \details{
 literanger trains classification and regression forests using the original
@@ -213,7 +214,7 @@ Unordered-factor predictors can be handled in 3 different ways by using
 \item For "order" and 2-class classification the factor levels are ordered by
 their proportion falling in the second class, for regression by their
 mean response, as described in Hastie et al. (2009), chapter 9.2.4. For
-multiclass classification the factor levels are ordered by the first
+multi-class classification the factor levels are ordered by the first
 principal component of the weighted covariance matrix of the contingency
 table (Coppersmith et al, 1999).
 }
@@ -222,7 +223,7 @@ The use of "order" is recommended, as it computationally fast and
 can handle an unlimited number of factor levels. Note that the factors are
 only reordered once and not again in each split.
 
-Compared to the original package 'ranger', literanger excludes certain
+Compared to the original package ranger, literanger excludes certain
 features:
 \itemize{
 \item Formula interface.
@@ -239,12 +240,12 @@ features:
 train(data=iris, response_name="Species")
 
 ## Prediction
-train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
-iris.train <- iris[train.idx, ]
-iris.test <- iris[-train.idx, ]
-rg.iris <- train(data=iris.train, response_name="Species")
-pred.iris <- predict(rg.iris, newdata=iris.test)
-table(iris.test$Species, pred.iris$values)
+train_idx <- sample(nrow(iris), 2/3 * nrow(iris))
+iris_train <- iris[train_idx, ]
+iris_test <- iris[-train_idx, ]
+rg_iris <- train(data=iris_train, response_name="Species")
+pred_iris <- predict(rg_iris, newdata=iris_test)
+table(iris_test$Species, pred_iris$values)
 
 }
 \references{
@@ -269,8 +270,8 @@ The elements of statistical learning: data mining, inference, and
 prediction (Vol. 2). New York: Springer.
 \doi{10.1007/978-0-387-21606-5}.
 \item Van Buuren, S. (2007). Multiple imputation of discrete and continuous
-data by fully conditional specification. _Statistical Methods in Medical
-Research, 16(3), 219-242. \doi{10.1177/0962280206074463}.
+data by fully conditional specification. \emph{Statistical Methods in Medical
+Research}, 16(3), 219-242. \doi{10.1177/0962280206074463}.
 \item Weinhold, L., Schmid, M., Wright, M. N., & Berger, M. (2019). A random
 forest approach for modeling bounded outcomes. \emph{arXiv preprint},
 arXiv:1901.06211. \doi{10.48550/arXiv.1901.06211}.
@@ -288,5 +289,5 @@ rank statistics. \emph{Statistics in medicine}, 36(8), 1272-1284.
 }
 \author{
 Stephen Wade \href{mailto:stephematician@gmail.com}{stephematician@gmail.com}, Marvin N Wright (original
-'ranger' package)
+ranger package)
 }

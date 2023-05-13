@@ -1,16 +1,14 @@
-CXX_STD = CXX11
+# CXX_STD = CXX14
 
-PKG_CPPFLAGS = -I../src -I../winlibs/
+# downloads eigen3 to extlibs/ and sets include location
+PKG_CPPFLAGS = -I../src -I../extlibs/
 
-# SOURCES = $(wildcard *.cpp)
-# OBJECTS = $(SOURCES:.cpp=.o)
+.PHONY: all clean extlibs
 
-.PHONY: all clean winlibs
+all: extlibs $(SHLIB)
 
-all: winlibs $(SHLIB)
-
-winlibs:
-	"${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" "../tools/winlibs.R"
+extlibs:
+	"${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" "../tools/extlibs.R"
 
 clean:
 	rm -f $(SHLIB) $(OBJECTS)

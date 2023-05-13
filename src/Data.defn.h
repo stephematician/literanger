@@ -20,7 +20,6 @@
 
 /* standard library headers */
 #include <algorithm>
-#include <cassert>
 #include <iterator>
 #include <numeric>
 #include <random>
@@ -48,7 +47,8 @@ inline void Data::get_all_values(dbl_vector & all_values,
                                  const size_t start, const size_t end,
                                  const bool permute) const {
 
-    assert(start <= end);
+    if (start > end)
+        throw std::invalid_argument("Start of interval must not be past end.");
 
     all_values.reserve(end - start);
 
@@ -68,7 +68,8 @@ inline void Data::get_minmax_values(double & min, double & max,
                                     const size_t start, const size_t end,
                                     const bool permute) const {
 
-    assert(start <= end);
+    if (start > end)
+        throw std::invalid_argument("Start of interval must not be past end.");
 
     if (sample_keys.size() > 0)
         max = min = get_x(sample_keys[start], predictor_key, permute);
@@ -138,14 +139,18 @@ inline size_t Data::get_index(const size_t sample_key,
                               const size_t predictor_key,
                               const bool permute) const {
     const size_t row = as_row_offset(sample_key, permute);
-    assert(predictor_key < n_col);
+    if (predictor_key >= n_col)
+        throw std::invalid_argument("Predictor key must be less than number of "
+            "columns.");
     return predictor_index[predictor_key * n_row + row];
 }
 
 
 inline double Data::get_unique_predictor_value(const size_t predictor_key,
                                                const size_t offset) const {
-    assert(predictor_key < n_col);
+    if (predictor_key >= n_col)
+        throw std::invalid_argument("Predictor key must be less than number of "
+            "columns.");
     return unique_predictor_values[predictor_key][offset];
 }
 
@@ -153,7 +158,9 @@ inline double Data::get_unique_predictor_value(const size_t predictor_key,
 inline size_t Data::get_n_unique_predictor_value(
     const size_t predictor_key
 ) const {
-    assert(predictor_key < n_col);
+    if (predictor_key >= n_col)
+        throw std::invalid_argument("Predictor key must be less than number of "
+            "columns.");
     return unique_predictor_values[predictor_key].size();
 }
 
@@ -194,7 +201,9 @@ inline void Data::new_response_index(const dbl_vector & response_values) const {
                       response_values.cend(),
                       get_y(j, 0))
         );
-        assert(value_key != response_values.size());
+        if (value_key == response_values.size())
+            throw std::invalid_argument("Response values does not contain all "
+                "values observe in data.");
         response_index.emplace_back(value_key);
     }
 

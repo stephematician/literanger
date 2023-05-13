@@ -3,8 +3,7 @@
  * package for R Statistical Software <https://www.r-project.org>. ranger was
  * authored by Marvin N Wright with the GNU General Public License version 3.
  * The adaptation was performed by Stephen Wade in 2023. literanger carries the
- * same license, terms, and
- * permissions as ranger.
+ * same license, terms, and permissions as ranger.
  *
  * literanger is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +33,7 @@
 /* standard library headers */
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -107,7 +107,9 @@ cpp11::list cpp11_train(
         as_nested_ptr<double,cpp11::doubles>(draw_predictor_weights);
 
     const SplitRule enum_split_rule(as_split_rule(split_rule));
-    const double min_metric_decrease = enum_split_rule != MAXSTAT ? 0 : -alpha;
+    double min_metric_decrease;
+    set_min_metric_decrease(min_metric_decrease, enum_split_rule, alpha);
+
     set_min_split_n_sample(min_split_n_sample, enum_tree_type);
     set_min_leaf_n_sample(min_leaf_n_sample, enum_tree_type);
 
@@ -304,6 +306,26 @@ void set_min_leaf_n_sample(size_t & min_leaf_n_sample,
     min_leaf_n_sample = table[tree_type];
 }
 
+
+void set_min_metric_decrease(double & min_metric_decrease,
+                             const literanger::SplitRule split_rule,
+                             const double alpha) {
+    using namespace literanger;
+
+    switch (split_rule) {
+    case EXTRATREES: case LOGRANK: case HELLINGER: {
+        min_metric_decrease = 0;
+    } break;
+    case BETA: {
+        min_metric_decrease = -std::numeric_limits<double>::max();
+    } break;
+    case MAXSTAT: {
+        min_metric_decrease = -alpha;
+    } break;
+    default: throw std::runtime_error("Unexpected value of split metric.");
+    }
+
+}
 
 void set_draw_predictor_weights(
     std::shared_ptr<std::vector<double>> draw_predictor_weights,

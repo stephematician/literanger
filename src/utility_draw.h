@@ -17,7 +17,6 @@
 
 /* standard library headers */
 #include <algorithm>
-#include <cassert>
 #include <cstddef>
 #include <random>
 
@@ -99,8 +98,12 @@ inline void draw_replace(const size_t n,
                          key_vector & result,
                          count_vector & inbag_counts) {
 
-    assert(result.size() == 0);
-    assert(inbag_counts.size() == limit);
+    if (result.size() != 0)
+        throw std::invalid_argument("Require that output vector is initially "
+            "empty");
+    if (inbag_counts.size() != limit)
+        throw std::invalid_argument("Require that output counts is initially "
+            "zero and length equal to maximum drawn value.");
 
     std::uniform_int_distribution<size_t> U_rng(0, limit  - 1);
     result.reserve(n);
@@ -120,8 +123,12 @@ inline void draw_replace_weighted(const size_t n,
                                   key_vector & result,
                                   count_vector & inbag_counts) {
 
-    assert(result.size() == 0);
-    assert(inbag_counts.size() == weights.size());
+    if (result.size() != 0)
+        throw std::invalid_argument("Require that output vector is initially "
+            "empty");
+    if (inbag_counts.size() != weights.size())
+        throw std::invalid_argument("Require that output counts is initially "
+            "zero and length equal to maximum drawn value.");
 
     std::discrete_distribution<> wtd_rng(weights.cbegin(), weights.cend());
     result.reserve(n);
@@ -140,8 +147,12 @@ inline void draw_no_replace(const size_t n, const size_t limit,
                             std::mt19937_64 & gen,
                             key_vector & result, count_vector & inbag_counts) {
 
-    assert(result.size() == 0);
-    assert(inbag_counts.size() == limit);
+    if (result.size() != 0)
+        throw std::invalid_argument("Require that output vector is initially "
+            "empty");
+    if (inbag_counts.size() != limit)
+        throw std::invalid_argument("Require that output counts is initially "
+            "zero and length equal to maximum drawn value.");
     const bool n_skipped = skipped.size();
 
     if (n < (limit / 10)) {
@@ -194,8 +205,12 @@ inline void draw_no_replace_weighted(const size_t n, const dbl_vector & weights,
                                      key_vector & result,
                                      count_vector & inbag_counts) {
 
-    assert(result.size() == 0);
-    assert(inbag_counts.size() == weights.size());
+    if (result.size() != 0)
+        throw std::invalid_argument("Require that output vector is initially "
+            "empty");
+    if (inbag_counts.size() != weights.size())
+        throw std::invalid_argument("Require that output counts is initially "
+            "zero and length equal to maximum drawn value.");
 
     std::discrete_distribution<> wtd_rng(weights.cbegin(), weights.cend());
     result.reserve(n);

@@ -316,6 +316,65 @@ inline void ForestClassification::aggregate_one_item<INBAG>(
 ) { }
 
 
+template <>
+inline void ForestClassification::new_predictions<NODES>(
+    const std::shared_ptr<const Data> data, const size_t n_thread
+) {
+    const size_t n_sample = data->get_n_row();
+    prediction_nodes.assign(n_sample, key_vector());
+    for (auto & each_sample : prediction_nodes) each_sample.assign(n_tree, 0);
+}
+
+
+template <PredictionType prediction_type, typename result_type,
+          enable_if_nodes<prediction_type>>
+void ForestClassification::finalise_predictions(
+    result_type & result
+) {
+    result = prediction_nodes;
+    prediction_nodes.clear();
+    prediction_nodes.shrink_to_fit();
+}
+
+
+template <>
+inline void ForestClassification::predict_one_tree<NODES>(
+    const size_t tree_key,
+    const std::shared_ptr<const Data> data,
+    const key_vector & sample_keys
+) {
+
+    TreeClassification & tree_impl =
+        *static_cast<TreeClassification *>(trees[tree_key].get());
+
+    const size_t n_predict = sample_keys.size();
+
+    key_vector tree_predictions;
+    tree_predictions.reserve(n_predict);
+
+  /* Get the predictions for the tree */
+    for (size_t key : sample_keys) {
+        std::back_insert_iterator<key_vector> prediction_inserter =
+            std::back_inserter(tree_predictions);
+        tree_impl.predict<NODES>(data, key, prediction_inserter);
+    }
+
+  /* Copy the set of predictions for this tree to the container that will be
+   * accessed in the aggregation step */
+    {
+        std::unique_lock<std::mutex> lock(mutex);
+        for (size_t key : sample_keys)
+            prediction_nodes[key][tree_key] = tree_predictions[key];
+    }
+
+}
+
+
+template <>
+inline void ForestClassification::aggregate_one_item<NODES>(
+    const size_t item_key
+) { }
+
 } /* namespace literanger */
 
 

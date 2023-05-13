@@ -14,13 +14,13 @@ algorithms. `ranger` is a fast implementation of random forests
 suited for high dimensional data ([Wright et al, 2017][wright2017_doi]).
 `literanger` enables random forests to be embedded in the fully conditional
 specification framework for multiple imputation known as 'Multiple Imputation
-via Chained Equations' (Van Buuren 2007).
+via Chained Equations' ([Van Buuren, 2007][vanbuuren2007_doi]).
 
 Implementations of multiple imputation with random forests include:
 
 1.  [`mice`][mice_cran] which uses random forests to predict in a similar
-    fashion to [Doove et al, 2014][doove2014_doi], i.e. for each observation, a
-    draw is taken from the sample of all values that belong to the the terminal
+    fashion to [Doove et al, (2014)][doove2014_doi], i.e. for each observation,
+    a draw is taken from the sample of all values that belong to the terminal
     node of a randomly drawn tree.
 2.  [`miceRanger`][miceranger_cran] and [`missRanger`][missranger_cran] which
     use predictive mean matching.
@@ -38,7 +38,7 @@ object and the separation of the (training) data from the forest, see `ranger`
 A multiple imputation algorithm using this package is under development: called
 [`smirf`][smirf_github].
 
-[mice_cran]: https://cran.r-project.org/package=MICE
+[mice_cran]: https://cran.r-project.org/package=mice
 [miceranger_cran]: https://cran.r-project.org/package=miceRanger
 [missranger_cran]: https://cran.r-project.org/package=missRanger
 [ranger_cran]: https://cran.r-project.org/package=ranger
@@ -50,18 +50,18 @@ A multiple imputation algorithm using this package is under development: called
 ```r
 require(literanger)
 
-train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
-iris.train <- iris[ train.idx, ]
-iris.test  <- iris[-train.idx, ]
-rg.iris <- train(data=iris.train, response_name="Species")
-pred.iris.bagged <- predict(rg.iris, newdata=iris.test,
+train_idx <- sample(nrow(iris), 2/3 * nrow(iris))
+iris_train <- iris[ train_idx, ]
+iris_test  <- iris[-train_idx, ]
+rf_iris <- train(data=iris_train, response_name="Species")
+pred_iris_bagged <- predict(rf_iris, newdata=iris_test,
                             prediction_type="bagged")
-pred.iris.inbag  <- predict(rg.iris, newdata=iris.test,
+pred_iris_inbag  <- predict(rf_iris, newdata=iris_test,
                             prediction_type="inbag")
 # compare bagged vs actual test values
-table(test.iris$Species, pred.iris.bagged$values)
+table(iris_test$Species, pred_iris_bagged$values)
 # compare bagged prediction vs in-bag draw
-table(pred.iris.bagged$values, pred.iris.inbag$values)
+table(pred_iris_bagged$values, pred_iris_inbag$values)
 ```
 
 
@@ -88,7 +88,8 @@ install.packages('cpp11')
 
 Not exhaustive:
 
--   prediction type: terminal nodes for every tree (e.g. for mice algo);
+-   ~~prediction type: terminal nodes for every tree (e.g. for mice
+    algorithm);~~
 -   ~~finish documentation, e.g. this README~~;
 -   prepare CRAN submission;
 -   implement variable importance measures;
@@ -102,15 +103,21 @@ Breiman, L. (2001). Random forests. _Machine learning_, 45, pp. 5-32.
 
 Doove, L.L., Van Buuren, S. and Dusseldorp, E., 2014. Recursive partitioning for
 missing data imputation in the presence of interaction effects. _Computational
-Statistics & Data Analysis, 72_, pp. 92-104.
+Statistics & Data Analysis_, 72, pp. 92-104.
 [doi:10.1016/j.csda.2013.10.025](https://doi.org/10.1016/j.csda.2013.10.025).
+
+Van Buuren, S. 2007. Multiple imputation of discrete and continuous  data by
+fully conditional specification. _Statistical Methods in Medical Research_,
+16(3), pp. 219-242. 
+[doi:10.1177/0962280206074463](https://doi.org/10.1177/0962280206074463).
 
 Wright, M. N. and Ziegler, A., 2017. ranger: A fast implementation of random
 forests for high dimensional data in C++ and R. _Journal of Statistical
-Software, 77_(i01), pp. 1-17.
+Software_, 77(i01), pp. 1-17.
 [doi:10.18637/jss.v077.i01](https://doi.org/10.18637/jss.v077.i01).
 
 [brieman2001_doi]: https://doi.org/10.1023/A:1010933404324
 [doove2014_doi]: https://doi.org/10.1016/j.csda.2013.10.025
+[vanbuuren2007_doi]: https://doi.org/10.1177/0962280206074463
 [wright2017_doi]: https://doi.org/10.18637/jss.v077.i01
 

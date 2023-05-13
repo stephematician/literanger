@@ -20,7 +20,6 @@
 
 /* standard library headers */
 #include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <limits>
 #include <random>
@@ -209,7 +208,7 @@ void Tree<ImplT>::best_decrease_by_value_extratrees(
 
   /* Get the candidate values using extra-trees algorithm - i.e. randomly
    * sample between minimum and maximum value */
-    double min, max;
+    double min = 0, max = 0;
     data->get_minmax_values(min, max, sample_keys, split_key,
                             start_pos[node_key], end_pos[node_key]);
     if (min == max) return;
@@ -374,14 +373,13 @@ void Tree<ImplT>::best_decrease_by_value_largeq(
     const size_t n_candidate_value =
         data->get_n_unique_predictor_value(split_key);
 
-  /* Break if pure or empty node. */
-    if (n_candidate_value < 2) return;
-
   /* Use mid-point. See comments in best_decrease_by_value_smallq */
     auto update_best_value = [&](size_t j0){
         size_t j1 = j0 + 1;
       /* find the next candidate that is present in the node */
         while (j1 != n_candidate_value && node_n_by_candidate[j1] == 0) ++j1;
+      /* should check that j1 != n_candidate_value ... but this should never
+       * happen. */
         const double x0 = data->get_unique_predictor_value(split_key, j0);
         const double x1 = data->get_unique_predictor_value(split_key, j1);
         best_value = (x0 + x1) / 2;
@@ -389,6 +387,11 @@ void Tree<ImplT>::best_decrease_by_value_largeq(
     };
 
     prepare_candidate_loop_via_index(split_key, node_key, data, sample_keys);
+
+  /* Break if pure or empty node. */
+    size_t real_n_candidate = 0;
+    for (const size_t & n : node_n_by_candidate) real_n_candidate += n > 0;
+    if (real_n_candidate < 2) return;
 
     tree_impl.best_decrease_by_real_value(
         split_key, n_sample_node, n_candidate_value,

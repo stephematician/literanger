@@ -17,7 +17,6 @@
 
 /* standard library headers */
 #include <algorithm>
-#include <cassert>
 #include <cstddef>
 #include <iterator>
 #include <memory>
@@ -151,7 +150,7 @@ inline void equal_split(std::vector<size_t> & result,
                         const size_t start, const size_t end,
                         const size_t n) {
 
-    assert(n >= 1);
+    if (n == 0) throw std::domain_error("Cannot split into zero parts.");
 
     result.clear();
     result.reserve(n + 1);
@@ -176,7 +175,9 @@ ValueT most_frequent_value(const std::unordered_map<ValueT,CountT> & counts,
                            std::mt19937_64 & gen,
                            const bool order_invariant) {
 
-    assert(!counts.empty());
+    if (counts.empty())
+        throw std::invalid_argument("Cannot find most frequent value for empty "
+            "map.");
 
     std::vector<ValueT> major_values;
     major_values.reserve(counts.size());
@@ -194,7 +195,8 @@ ValueT most_frequent_value(const std::unordered_map<ValueT,CountT> & counts,
   /* Short circuit if unique maximum. */
     if (major_values.size() == 1) return major_values[0];
 
-    assert(major_values.size() > 1);
+    if (major_values.size() <= 1)
+        throw std::runtime_error("Did not expect empty most frequent values.");
 
   /* random draw from the set of values with maximum count */
     std::uniform_int_distribution<size_t> U_rng(0, major_values.size() - 1);

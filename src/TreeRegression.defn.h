@@ -20,7 +20,6 @@
 
 /* standard library headers */
 #include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <iterator>
 #include <limits>
@@ -83,6 +82,15 @@ void TreeRegression::predict_from_inbag(
 }
 
 
+template <PredictionType prediction_type, typename result_type,
+          enable_if_nodes<prediction_type>>
+void TreeRegression::predict_from_inbag(
+    const size_t node_key,
+    result_type & result
+) {
+    result = node_key;
+}
+
 inline void TreeRegression::new_growth(
     const std::shared_ptr<const Data> data
 ) {
@@ -129,24 +137,21 @@ inline void TreeRegression::new_node_aggregates(
   /* Compute sum of responses and the sum of the response-squared in node, or in
    * the maximally selected rank statistic case, sum the scores and squared
    * scores. */
-    node_sum = node_ssq = 0;
+    node_sum = node_var = 0;
     if (split_rule != MAXSTAT) {
-        for (size_t j = start_pos[node_key]; j != end_pos[node_key]; ++j) {
-            const size_t sample_key = sample_keys[j];
-            const double response = data->get_y(sample_key, 0);
-            node_sum += response;
-            if (split_rule == BETA) node_ssq += response * response;
-        }
+        for (size_t j = start_pos[node_key]; j != end_pos[node_key]; ++j)
+            node_sum += data->get_y(sample_keys[j], 0);
     } else {
+        const size_t n_sample = get_n_sample_node(node_key);
         for (size_t j = start_pos[node_key]; j != end_pos[node_key]; ++j) {
             const size_t sample_key = sample_keys[j];
             response_scores.emplace_back(data->get_y(sample_key, 0));
         }
         response_scores = rank(response_scores);
-        for (const double & score : response_scores) {
-            node_sum += score;
-            node_ssq += score * score;
-        }
+        for (const double & score : response_scores) node_sum += score;
+        for (const double & score : response_scores)
+            node_var += std::pow(score - node_sum / n_sample, 2);
+        node_var /= (double)(n_sample - 1);
     }
 }
 
@@ -167,10 +172,8 @@ inline void TreeRegression::prepare_candidate_loop_via_value(
 
     node_n_by_candidate.assign(n_candidate_value, 0);
     node_sum_by_candidate.assign(n_candidate_value, 0);
-    if (split_rule == BETA) {
-        node_ssq_by_candidate.assign(n_candidate_value, 0);
+    if (split_rule == BETA)
         response_by_candidate.assign(n_candidate_value, dbl_vector());
-    }
 
     for (size_t j = start_pos[node_key]; j != end_pos[node_key]; ++j) {
 
@@ -185,10 +188,8 @@ inline void TreeRegression::prepare_candidate_loop_via_value(
 
         ++node_n_by_candidate[offset];
         node_sum_by_candidate[offset] += response;
-        if (split_rule == BETA) {
-            node_ssq_by_candidate[offset] += response * response;
+        if (split_rule == BETA)
             response_by_candidate[offset].push_back(response);
-        }
 
     }
 
@@ -206,10 +207,8 @@ inline void TreeRegression::prepare_candidate_loop_via_index(
 
     node_n_by_candidate.assign(n_candidate_value, 0);
     node_sum_by_candidate.assign(n_candidate_value, 0);
-    if (split_rule == BETA) {
-        node_ssq_by_candidate.assign(n_candidate_value, 0);
+    if (split_rule == BETA)
         response_by_candidate.assign(n_candidate_value, dbl_vector());
-    }
 
     for (size_t j = start_pos[node_key]; j != end_pos[node_key]; ++j) {
 
@@ -219,10 +218,8 @@ inline void TreeRegression::prepare_candidate_loop_via_index(
 
         ++node_n_by_candidate[offset];
         node_sum_by_candidate[offset] += response;
-        if (split_rule == BETA) {
-            node_ssq_by_candidate[offset] += response * response;
+        if (split_rule == BETA)
             response_by_candidate[offset].push_back(response);
-        }
 
     }
 
@@ -237,8 +234,6 @@ inline void TreeRegression::finalise_candidate_loop() {
       /* NOTE: release of memory may be implementation dependent */
         node_sum_by_candidate.clear();
         node_sum_by_candidate.shrink_to_fit();
-        node_ssq_by_candidate.clear();
-        node_ssq_by_candidate.shrink_to_fit();
         response_by_candidate.clear();
         response_by_candidate.shrink_to_fit();
     }
@@ -255,28 +250,24 @@ void TreeRegression::best_decrease_by_real_value(
 
     size_t n_lhs = 0;
     double sum_lhs = 0;
-    double ssq_lhs = 0;
-    assert(n_candidate_value > 1);
+    if (n_candidate_value <= 1)
+        throw std::runtime_error("Cannot evaluate a split for a node with "
+            "one in-bag value.");
 
     for (size_t j = 0; j != n_candidate_value - 1; ++j) {
 
         if (node_n_by_candidate[j] == 0) continue;
 
         n_lhs += node_n_by_candidate[j];
+        sum_lhs += node_sum_by_candidate[j];
         if (n_lhs < min_leaf_n_sample) continue;
 
         const size_t n_rhs = n_sample_node - n_lhs;
         if (n_rhs < min_leaf_n_sample) break;
 
-      /* */
-        sum_lhs += node_sum_by_candidate[j];
-        if (split_rule == BETA) ssq_lhs += node_ssq_by_candidate[j];
-
         const double sum_rhs = node_sum - sum_lhs;
-        const double ssq_rhs = node_ssq - ssq_lhs;
         const double decrease = evaluate_decrease(n_lhs, n_rhs,
-                                                  sum_lhs, sum_rhs,
-                                                  ssq_lhs, ssq_rhs);
+                                                  sum_lhs, sum_rhs);
 
      /* If the decrease in node impurity has improved - then we update the best
       * split for the node. */
@@ -312,7 +303,6 @@ void TreeRegression::best_decrease_by_partition(
       /* Get the bit-encoded partition value */
         ull_bitenc partition_key = to_partition_key(j);
 
-        double ssq_lhs = 0;
         double sum_lhs = 0;
         size_t n_lhs = 0;
 
@@ -322,9 +312,6 @@ void TreeRegression::best_decrease_by_partition(
                 data->get_x(sample_key, split_key) - 1
             );
             if (!partition_key.test(level_bit)) {
-                if (split_rule == BETA)
-                    ssq_lhs += data->get_y(sample_key, 0) *
-                                   data->get_y(sample_key, 0);
                 sum_lhs += data->get_y(sample_key, 0);
                 ++n_lhs;
             }
@@ -342,10 +329,8 @@ void TreeRegression::best_decrease_by_partition(
         if (n_rhs < min_leaf_n_sample) continue;
 
         const double sum_rhs = node_sum - sum_lhs;
-        const double ssq_rhs = node_ssq - ssq_lhs;
         const double decrease = evaluate_decrease(n_lhs, n_rhs,
-                                                  sum_lhs, sum_rhs,
-                                                  ssq_lhs, ssq_rhs);
+                                                  sum_lhs, sum_rhs);
 
         if (decrease > best_decrease) {
             (size_t &)best_value = partition_key.to_ullong();
@@ -371,30 +356,33 @@ void TreeRegression::best_statistic_by_real_value(
     double & this_decrease, UpdateT update_this_value, double & this_p_value
 ) {
 
-    assert(n_sample_node > 1);
+    if (n_candidate_value <= 1)
+        throw std::runtime_error("Cannot evaluate a split for a node with "
+            "one in-bag value.");
 
   /* smallest split to consider */
     const size_t min_split = std::max(0.0, n_sample_node * min_prop - 1);
 
     double sum_lhs = 0;
     size_t n_lhs = 0;
-    assert(n_candidate_value > 1);
+    if (n_candidate_value <= 1)
+        throw std::runtime_error("Cannot evaluate a split for a node with "
+            "one in-bag value.");
 
     for (size_t j = 0; j != n_candidate_value - 1; ++j) {
 
         if (node_n_by_candidate[j] == 0) continue;
 
         n_lhs += node_n_by_candidate[j];
+        sum_lhs += node_sum_by_candidate[j];
         if (n_lhs < std::max(min_leaf_n_sample, min_split)) continue;
 
         const size_t n_rhs = n_sample_node - n_lhs;
         if (n_rhs < std::max(min_leaf_n_sample, min_split)) break;
 
-        const double sum_rhs = node_sum - sum_lhs, ssq_lhs = 0, ssq_rhs = 0;
-
+        const double sum_rhs = node_sum - sum_lhs;
         const double decrease = evaluate_decrease(n_lhs, n_rhs,
-                                                  sum_lhs, sum_rhs,
-                                                  ssq_lhs, ssq_rhs);
+                                                  sum_lhs, sum_rhs);
 
         if (decrease > this_decrease) {
             update_this_value(j);
@@ -415,8 +403,7 @@ void TreeRegression::best_statistic_by_real_value(
 
 inline double TreeRegression::evaluate_decrease(
     const size_t n_lhs, const size_t n_rhs,
-    const double sum_lhs, const double sum_rhs,
-    const double ssq_lhs, const double ssq_rhs
+    const double sum_lhs, const double sum_rhs
 ) const {
 
     switch (split_rule) {
@@ -424,44 +411,57 @@ inline double TreeRegression::evaluate_decrease(
       /* Need at least two observations per node to estimate parameters for
        * beta distribution. */
         if (n_lhs < 2 || n_rhs < 2) return -INFINITY;
-
-      /* Using E[(x - E[x])^2] = E[X^2] - E[X]^2 and the unbiased estimate of
-       * (sample) variance. */
-        const double var_lhs = (ssq_lhs - (sum_lhs * sum_lhs) / n_lhs) /
-                                   (n_lhs - 1.0);
-        const double var_rhs = (ssq_rhs - (sum_rhs * sum_rhs) / n_rhs) /
-                                   (n_rhs - 1.0);
-        if (var_lhs < std::numeric_limits<double>::epsilon() ||
-                var_rhs < std::numeric_limits<double>::epsilon())
-            return -INFINITY;
-
-      /* Mean and 'sample size' parameterisation of beta distribution - see
-       * wikipedia mu/nu definitions */
-        const double mu_lhs = sum_lhs / n_lhs;
-        const double nu_lhs = mu_lhs * (1 - mu_lhs) / var_lhs - 1.0;
-        const double mu_rhs = sum_rhs / n_rhs;
-        const double nu_rhs = mu_rhs * (1 - mu_rhs) / var_rhs - 1.0;
-
-      /* Evaluate the the log-likelihood on left- and right-hand side given the
-       * current split candidate */
-        double beta_lnL_lhs = 0, beta_lnL_rhs = 0;
-        size_t count = 0; /* use this to track left vs right */
-        for (size_t j = 0; j != node_n_by_candidate.size(); ++j) {
-          /* Select the lhs or rhs parameters */
-            const bool is_lhs = count < n_lhs;
-            const double mu_j = is_lhs ? mu_lhs : mu_rhs;
-            const double nu_j = is_lhs ? nu_lhs : nu_rhs;
-            double & result = is_lhs ? beta_lnL_lhs : beta_lnL_rhs;
-          /* Record the likelihood for each observation */
-            for (const double & response : response_by_candidate[j])
-                result += beta_log_likelihood(response, mu_j, nu_j);
-            count += node_n_by_candidate[j];
+        const size_t n_candidate_value = node_n_by_candidate.size();
+        size_t j_lhs = 0;
+        {
+            size_t count = 0;
+            for (size_t j = 0; j != n_candidate_value; ++j) {
+                if (count == n_lhs) { j_lhs = j; break; }
+                count += node_n_by_candidate[j];
+            }
         }
 
-        const double result = beta_lnL_lhs + beta_lnL_rhs;
+        const double mu_lhs = sum_lhs / n_lhs, mu_rhs = sum_rhs / n_rhs;
 
-        return std::isnan(result) ? -INFINITY : result;
+        double var_lhs = 0, var_rhs = 0;
+      /* get variance of lhs */
+        for (size_t j = 0; j != j_lhs; ++j) {
+            if (node_n_by_candidate[j] == 0) continue;
+            for (const double & response : response_by_candidate[j])
+                var_lhs += std::pow(response - mu_lhs, 2.0);
+        }
+        var_lhs /= (double)(n_lhs - 1);
 
+      /* get variance of rhs */
+        for (size_t j = j_lhs; j != n_candidate_value; ++j) {
+            if (node_n_by_candidate[j] == 0) continue;
+            for (const double & response : response_by_candidate[j])
+                var_rhs += std::pow(response - mu_rhs, 2.0);
+        }
+        var_rhs /= (double)(n_rhs - 1);
+
+        if (var_lhs <= std::numeric_limits<double>::epsilon() ||
+                var_rhs <= std::numeric_limits<double>::epsilon())
+            return -INFINITY;
+
+        const double nu_lhs = mu_lhs * (1 - mu_lhs) / var_lhs - 1,
+                     nu_rhs = mu_rhs * (1 - mu_rhs) / var_rhs - 1;
+
+        double beta_lnL = 0;
+     /* sum beta log likelihood on lhs */
+        for (size_t j = 0; j != j_lhs; ++j) {
+            if (node_n_by_candidate[j] == 0) continue;
+            for (const double & response : response_by_candidate[j])
+                beta_lnL += beta_log_likelihood(response, mu_lhs, nu_lhs);
+        }
+     /* sum beta log likelihood on r */
+        for (size_t j = j_lhs; j != n_candidate_value; ++j) {
+            if (node_n_by_candidate[j] == 0) continue;
+            for (const double & response : response_by_candidate[j])
+                beta_lnL += beta_log_likelihood(response, mu_rhs, nu_rhs);
+        }
+
+        return !std::isnan(beta_lnL) ? beta_lnL : -INFINITY;
     } break;
     case EXTRATREES: case LOGRANK: {
         const double sum_lhs_sq = sum_lhs * sum_lhs;
@@ -471,7 +471,7 @@ inline double TreeRegression::evaluate_decrease(
     case MAXSTAT: {
         const double n = n_lhs + n_rhs;
         const double mu = node_sum / n;
-        const double var = (node_ssq - node_sum * node_sum / n) / (n - 1);
+        const double var = node_var;
         const double S = sum_lhs;
         const double E = n_lhs * mu;
         const double V = n_lhs * (double)n_rhs * var / n;

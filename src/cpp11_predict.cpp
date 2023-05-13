@@ -3,8 +3,7 @@
  * package for R Statistical Software <https://www.r-project.org>. ranger was
  * authored by Marvin N Wright with the GNU General Public License version 3.
  * The adaptation was performed by Stephen Wade in 2023. literanger carries the
- * same license, terms, and
- * permissions as ranger.
+ * same license, terms, and permissions as ranger.
  *
  * literanger is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,10 +65,12 @@ cpp11::list cpp11_predict(
 
     using namespace literanger;
     using namespace cpp11::literals;
+    using nodes_matrix_t = cpp11::writable::integers_matrix<cpp11::by_row>;
     cpp11::writable::list result;
 
     const std::string tree_type = cpp11::as_cpp<std::string>(object["tree_type"]);
     cpp11::external_pointer<ForestBase> forest = object["cpp11_ptr"];
+    const size_t n_tree = forest->get_tree_parameters().size();
 
     std::shared_ptr<Data> data { };
 
@@ -108,6 +109,8 @@ cpp11::list cpp11_predict(
         data = std::shared_ptr<Data>(new DataR(x, y));
     }
 
+    const size_t n_case = data->get_n_row();
+
   /* Perform predictions */
     const size_t predict_n_thread = n_thread == DEFAULT_N_THREAD ?
         std::thread::hardware_concurrency() : n_thread;
@@ -133,13 +136,17 @@ cpp11::list cpp11_predict(
                                                 predictions, print_out);
             result.push_back({"values"_nm=predictions});
         } break;
-       // case NODES: {
-       //     std::vector<key_vector> predictions;
-       //     forest_impl.template predict<NODES>(data, seed, predict_n_thread,
-       //                                         user_interrupt,
-       //                                         predictions, print_out);
-       //     result.push_back({"values"_nm=predictions});
-       // } break; }
+        case NODES: {
+            std::vector<key_vector> predictions;
+            forest_impl.template predict<NODES>(data, seed, predict_n_thread,
+                                                user_interrupt,
+                                                predictions, print_out);
+            nodes_matrix_t terminal_nodes(n_case, n_tree);
+            for (size_t j = 0; j != n_case; ++j)
+                std::copy(predictions[j].cbegin(), predictions[j].cend(),
+                          terminal_nodes[j].begin());
+            result.push_back({"nodes"_nm=terminal_nodes});
+        } break;
         default: throw std::invalid_argument("Unsupported prediction type."); }
 
     } break;
@@ -160,13 +167,17 @@ cpp11::list cpp11_predict(
                                                 predictions, print_out);
             result.push_back({"values"_nm=predictions});
         } break;
-       // case NODES: {
-       //     std::vector<key_vector> predictions;
-       //     forest_impl.template predict<NODES>(data, seed, predict_n_thread,
-       //                                         user_interrupt,
-       //                                         predictions, print_out);
-       //     result.push_back({"values"_nm=predictions});
-       // } break; }
+        case NODES: {
+            std::vector<key_vector> predictions;
+            forest_impl.template predict<NODES>(data, seed, predict_n_thread,
+                                                user_interrupt,
+                                                predictions, print_out);
+            nodes_matrix_t terminal_nodes(n_case, n_tree);
+            for (size_t j = 0; j != n_case; ++j)
+                std::copy(predictions[j].cbegin(), predictions[j].cend(),
+                          terminal_nodes[j].begin());
+            result.push_back({"nodes"_nm=terminal_nodes});
+        } break;
         default: throw std::invalid_argument("Unsupported prediction type."); }
 
     } break;

@@ -70,20 +70,23 @@ struct TreeRegression: Tree<TreeRegression> {
         void predict_from_inbag(const size_t node_key,
                                 result_type & result);
 
+        template <PredictionType prediction_type, typename result_type,
+                  enable_if_nodes<prediction_type> = nullptr>
+        void predict_from_inbag(const size_t node_key,
+                                result_type & result);
+
+
+
     protected:
 
         const double min_prop;
 
         double node_sum;
 
-        double node_ssq;
+        double node_var;
 
         /** Sum of the responses for each candidate split value. */
         mutable dbl_vector node_sum_by_candidate;
-
-        /** Sum of the responses squared for each candidate split value. Used
-         * for the beta split rule */
-        mutable dbl_vector node_ssq_by_candidate;
 
         /** Responses in intervals defined by each candidate split value. Each
          * interval is closed at the right. Used for the beta split rule. */
@@ -220,8 +223,7 @@ struct TreeRegression: Tree<TreeRegression> {
          */
         double evaluate_decrease(
             const size_t n_lhs, const size_t n_rhs,
-            const double sum_lhs, const double sum_rhs,
-            const double ssq_lhs, const double ssq_rhs
+            const double sum_lhs, const double sum_rhs
         ) const;
 
 

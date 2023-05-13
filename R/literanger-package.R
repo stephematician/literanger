@@ -1,4 +1,32 @@
-#' \pkg{literanger}: Random forests for multiple imputation algorithms.
+# ------------------------------------------------------------------------------
+# This file is part of 'literanger'. literanger was adapted from the 'ranger'
+# package for R statistical software. ranger was authored by Marvin N Wright
+# with the GNU General Public License version 3. The adaptation was performed by
+# Stephen Wade in 2023. literanger carries the same license, terms, and
+# permissions as ranger.
+#
+# literanger is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# literanger is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with literanger. If not, see <http://www.gnu.org/licenses/>.
+#
+# Written by:
+#
+#   Stephen Wade
+#   Cancer Council New South Wales
+#   Woolloomooloo NSW 2011
+#   Australia
+# ------------------------------------------------------------------------------
+
+#' \pkg{literanger}: Random Forests for Multiple Imputation based on 'ranger'.
 #'
 #' 'literanger' is an adaption of the 'ranger' R package for training and
 #' predicting from random forest models within multiple imputation algorithms.
@@ -6,7 +34,7 @@
 #' recursive partitioning, particularly suited for high dimensional data
 #' (Wright et al, 2017a). literanger enables random forests to be embedded in
 #' the fully conditional specification framework for multiple imputation known
-#' as 'Multiple Imputation via Chained Equations' (Van Buuren 2007).
+#' as "Multiple Imputation via Chained Equations" (Van Buuren 2007).
 #'
 #' literanger trains classification and regression forests. The trained forest
 #' retains information about the in-bag responses in each terminal node, thus
@@ -19,7 +47,7 @@
 #'
 #' Classification and regression forests are implemented as in the original
 #' Random Forest (Breiman, 2001) or using extremely randomized trees (Geurts et
-#' al, 2006). "data.frame", "matrix", and sparse matrices ("dgCmatrix") are
+#' al, 2006). 'data.frame', 'matrix', and sparse matrices ('dgCmatrix') are
 #' supported.
 #'
 #' Split selection may be based on improvement in metrics such as the variance,
@@ -36,24 +64,24 @@
 #' 'miceRanger' <https://cran.r-project.org/package=miceRanger>, which use
 #' predictive mean matching combined with the original 'ranger' algorithm.
 #'
-#' This package was adapted from the "ranger" package for R Statistical
+#' This package was adapted from the 'ranger' package for R Statistical
 #' Software. The C++ core is provided under the same license terms as the
 #' original C++ core in the 'ranger' package, namely the MIT license
 #' <https://www.r-project.org/Licenses/MIT>. The wrappers in this package around
 #' the core are licensed under the same terms of the corresponding components in
 #' the 'ranger' R package, namely the GPL3 license
-#' <https://www.r-project.org/Licenses/GPL-3>, <http:://www.gnu.org/licenses>.
+#' <https://www.r-project.org/Licenses/GPL-3>, <http://www.gnu.org/licenses/>.
 #'
 #'
 #' # License
 #'
-#' literanger was adapted from the 'ranger' package for R statistical software.
-#' ranger was authored by Marvin N. Wright with the GNU General Public License
-#' version 3 for the R package (interface), while the C++ core of ranger has the
-#' MIT license. The adaptation was performed by Stephen Wade in 2023. literanger
-#' carries the same license, terms, and permissions as ranger, including the GNU
-#' General Public License 3 for the R package interface, and the MIT license for
-#' the C++ core.
+#' 'literanger' was adapted from the 'ranger' package for R statistical
+#' software. ranger was authored by Marvin N. Wright with the GNU General Public
+#' License version 3 for the R package (interface), while the C++ core of ranger
+#' has the MIT license. The adaptation was performed by Stephen Wade in 2023.
+#' literanger carries the same license, terms, and permissions as ranger,
+#' including the GNU General Public License 3 for the R package interface, and
+#' the MIT license for the C++ core.
 #'
 #' License statement for C++ core of ranger:
 #'
@@ -123,7 +151,7 @@
 #'     112-118. \doi{10.1093/bioinformatics/btr597}.
 #' -   Van Buuren, S. (2007). Multiple imputation of discrete and continuous
 #'     data by fully conditional specification. _Statistical Methods in Medical
-#'     Research, 16(3), 219-242. \doi{10.1177/0962280206074463}.
+#'     Research_, 16(3), 219-242. \doi{10.1177/0962280206074463}.
 #' -   Weinhold, L., Schmid, M., Wright, M. N., & Berger, M. (2019). A random
 #'     forest approach for modeling bounded outcomes. _arXiv preprint_,
 #'     arXiv:1901.06211. \doi{10.48550/arXiv.1901.06211}.
@@ -140,19 +168,13 @@
 #'
 #' @useDynLib literanger, .registration = TRUE
 #'
+#' @keywords internal
 #' @docType package
-#' @name literanger-package
 #' @md
-NULL
+"_PACKAGE"
 
 # A recommended practise; unload this package's dynamic libraries,
 # see http://r-pkgs.had.co.nz/src.html
 .onUnload <- function (lib_path)
     library.dynam.unload("literanger", lib_path)
 
-# This dummy function definition is included with the package to ensure that
-# 'tools::package_native_routine_registration_skeleton()' generates the required
-# registration info for the 'run_testthat_tests' symbol.
-(function() {
-  .Call("run_testthat_tests", FALSE, PACKAGE="literanger")
-})

@@ -1,4 +1,4 @@
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # This file is part of 'literanger'. literanger was adapted from the 'ranger'
 # package for R statistical software. ranger was authored by Marvin N Wright
 # with the GNU General Public License version 3. The adaptation was performed by
@@ -24,7 +24,7 @@
 #   Cancer Council New South Wales
 #   Woolloomooloo NSW 2011
 #   Australia
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 # Order factor levels with PCA approach
 # Reference: Coppersmith, D., Hong, S.J. & Hosking, J.R. (1999) Partitioning
@@ -40,9 +40,9 @@ pca_order <- function(y, x) {
     N <- table(x, droplevels(y))
 
   # PCA of weighted covariance matrix of class probabilites
-    P <- N/rowSums(N)
-    S <- stats::cov.wt(P, wt = rowSums(N))$cov
-    pc1 <- stats::prcomp(S, rank. = 1)$rotation
+    P <- N / rowSums(N)
+    S <- stats::cov.wt(P, wt=rowSums(N))$cov
+    pc1 <- stats::prcomp(S, rank.=1)$rotation
     score <- P %*% pc1
 
   # Return ordered factor levels

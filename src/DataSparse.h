@@ -3,8 +3,7 @@
  * package for R Statistical Software <https://www.r-project.org>. ranger was
  * authored by Marvin N Wright with the GNU General Public License version 3.
  * The adaptation was performed by Stephen Wade in 2023. literanger carries the
- * same license, terms, and
- * permissions as ranger.
+ * same license, terms, and permissions as ranger.
  *
  * literanger is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +33,6 @@
 #include "Data.h"
 
 /* standard library headers */
-#include <cassert>
 #include <stdexcept>
 #include <string>
 #include <vector>

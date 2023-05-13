@@ -21,13 +21,9 @@ extern "C" SEXP _literanger_cpp11_train(SEXP x, SEXP y, SEXP sparse_x, SEXP case
 }
 
 extern "C" {
-/* .Call calls */
-extern SEXP run_testthat_tests(void *);
-
 static const R_CallMethodDef CallEntries[] = {
     {"_literanger_cpp11_predict", (DL_FUNC) &_literanger_cpp11_predict,  7},
     {"_literanger_cpp11_train",   (DL_FUNC) &_literanger_cpp11_train,   25},
-    {"run_testthat_tests",        (DL_FUNC) &run_testthat_tests,         1},
     {NULL, NULL, 0}
 };
 }

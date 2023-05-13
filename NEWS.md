@@ -13,6 +13,9 @@ _Computational statistics & data analysis_, 72, 92-104.
 Currently supports:
 
 -   Classification and regression trees/forests.
--   Bagged prediction or prediction given by drawing from a random tree and a
-    random in-bag value.
+-   Prediction types:
+    -   Conventional 'bagged' prediction (most frequent value or mean).
+    -   Terminal node identifiers for all trees.
+    -   Prediction given by drawing a tree for each prediction and then drawing
+        an in-bag value from the terminal node.
 

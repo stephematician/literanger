@@ -1,4 +1,4 @@
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # This file is part of 'literanger'. literanger was adapted from the 'ranger'
 # package for R statistical software. ranger was authored by Marvin N Wright
 # with the GNU General Public License version 3. The adaptation was performed by
@@ -24,8 +24,7 @@
 #   Cancer Council New South Wales
 #   Woolloomooloo NSW 2011
 #   Australia
-# -------------------------------------------------------------------------------
-
+# ------------------------------------------------------------------------------
 
 
 #' Train forest using ranger for multiple imputation algorithms.
@@ -34,8 +33,8 @@
 #' via an adaptation of the 'ranger' R package. ranger is a fast
 #' implementation of random forests (Breiman, 2001) or recursive partitioning,
 #' particularly suited for high dimensional data (Wright et al, 2017a).
-#' literanger supports prediction used in algorithms such as 'Multiple
-#' Imputation via Chained Equations' (Van Buuren, 2007).
+#' literanger supports prediction used in algorithms such as "Multiple
+#' Imputation via Chained Equations" (Van Buuren, 2007).
 #'
 #' literanger trains classification and regression forests using the original
 #' Random Forest (Breiman, 2001) or extremely randomized trees (Geurts et
@@ -89,7 +88,7 @@
 #' -   For "order" and 2-class classification the factor levels are ordered by
 #'     their proportion falling in the second class, for regression by their
 #'     mean response, as described in Hastie et al. (2009), chapter 9.2.4. For
-#'     multiclass classification the factor levels are ordered by the first
+#'     multi-class classification the factor levels are ordered by the first
 #'     principal component of the weighted covariance matrix of the contingency
 #'     table (Coppersmith et al, 1999).
 #'
@@ -97,7 +96,7 @@
 #' can handle an unlimited number of factor levels. Note that the factors are
 #' only reordered once and not again in each split.
 #'
-#' Compared to the original package 'ranger', literanger excludes certain
+#' Compared to the original package ranger, literanger excludes certain
 #' features:
 #'
 #' -   Formula interface.
@@ -158,9 +157,10 @@
 #' @param n_random_split "extratrees" split metric only: Number of random splits
 #' to consider for each candidate splitting variable, default is 1.
 #' @param alpha "maxstat" splitting rule only: Significance threshold to allow
-#' splitting, default is 0.5.
+#' splitting, default is 0.5, must be in the interval `(0,1]`.
 #' @param min_prop "maxstat" splitting rule only: Lower quantile of covariate
-#' distribution to be considered for splitting, default is 0.1.
+#' distribution to be considered for splitting, default is 0.1, must be in the
+#' interval `[0,0.5]`.
 #' @param seed Random seed, an integer between 1 and `.Machine$integer.max`.
 #' Default generates the seed from `R`, set to `0` to ignore the `R` seed and
 #' use a C++ `std::random_device`.
@@ -183,11 +183,11 @@
 #'   \item{`split_rule`}{The name of the split metric used.}
 #'   \item{`max_depth`}{The maximum allowed depth of a tree in the forest.}
 #'   \item{`min_metric_decrease`}{The minimum decrease in the metric for an
-#'     acceptable split (equal to negative 'alpha' for maximally selected
+#'     acceptable split (equal to negative @p alpha for maximally selected
 #'     rank statistics, else zero).}
 #'   \item{`min_split_n_sample`}{The minimum number of in-bag samples in a node
 #'     prior to splitting.}
-#'   \item{`min_leaf_n_sample`}{The minumum number of in-bag samples in a leaf
+#'   \item{`min_leaf_n_sample`}{The minimum number of in-bag samples in a leaf
 #'     node.}
 #'   \item{`seed`}{The seed supplied to the C++ library.}
 #'   \item{`oob_error`}{The misclassification rate or the mean square error
@@ -205,15 +205,15 @@
 #' train(data=iris, response_name="Species")
 #'
 #' ## Prediction
-#' train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
-#' iris.train <- iris[train.idx, ]
-#' iris.test <- iris[-train.idx, ]
-#' rg.iris <- train(data=iris.train, response_name="Species")
-#' pred.iris <- predict(rg.iris, newdata=iris.test)
-#' table(iris.test$Species, pred.iris$values)
+#' train_idx <- sample(nrow(iris), 2/3 * nrow(iris))
+#' iris_train <- iris[train_idx, ]
+#' iris_test <- iris[-train_idx, ]
+#' rg_iris <- train(data=iris_train, response_name="Species")
+#' pred_iris <- predict(rg_iris, newdata=iris_test)
+#' table(iris_test$Species, pred_iris$values)
 #'
 #' @author Stephen Wade <stephematician@gmail.com>, Marvin N Wright (original
-#' 'ranger' package)
+#' ranger package)
 #'
 #' @references
 #'
@@ -238,7 +238,7 @@
 #'     \doi{10.1007/978-0-387-21606-5}.
 #' -   Van Buuren, S. (2007). Multiple imputation of discrete and continuous
 #'     data by fully conditional specification. _Statistical Methods in Medical
-#'     Research, 16(3), 219-242. \doi{10.1177/0962280206074463}.
+#'     Research_, 16(3), 219-242. \doi{10.1177/0962280206074463}.
 #' -   Weinhold, L., Schmid, M., Wright, M. N., & Berger, M. (2019). A random
 #'     forest approach for modeling bounded outcomes. _arXiv preprint_,
 #'     arXiv:1901.06211. \doi{10.48550/arXiv.1901.06211}.
@@ -259,7 +259,7 @@ train <- function(
     x=NULL, y=NULL,
     case_weights=numeric(),
     classification=NULL, n_tree=10,
-    replace=T, sample_fraction=ifelse(replace, 1, 0.632),
+    replace=TRUE, sample_fraction=ifelse(replace, 1, 0.632),
     n_try=NULL,
     draw_predictor_weights=numeric(), names_of_always_draw=character(),
     split_rule=NULL, max_depth=0, min_split_n_sample=0, min_leaf_n_sample=0,
@@ -267,7 +267,7 @@ train <- function(
     response_weights=numeric(),
     n_random_split=1, alpha=0.5, min_prop=0.1,
     seed=1L + sample.int(n=.Machine$integer.max - 1L, size=1),
-    save_memory=F, n_thread=0, verbose=F
+    save_memory=FALSE, n_thread=0, verbose=FALSE
 ) {
 
     if (is.null(data) && !is.null(x) && !is.null(y)) {
@@ -285,8 +285,8 @@ train <- function(
             stop("'predictor_names' contained variables not found in data.")
         if (identical(predictor_names, character()))
             predictor_names <- setdiff(colnames(data), response_name)
-        y <- data[, response_name, drop=T]
-        x <- data[, predictor_names, drop=F]
+        y <- data[, response_name, drop=TRUE]
+        x <- data[, predictor_names, drop=FALSE]
     } else
         stop("Only one of 'data' or 'x'/'y' may be supplied.")
 
@@ -298,17 +298,17 @@ train <- function(
     if (any(is.na(x))) {
         offending_columns <- predictor_names[colSums(is.na(x)) > 0]
         stop("Missing values in the predictors: ",
-             paste0(offending_columns, collapse=", "), ".", call.=F)
+             paste0(offending_columns, collapse=", "), ".", call.=FALSE)
     }
     if (any(is.na(y)))
-        stop("Missing values in the response.", call.=F)
+        stop("Missing values in the response.", call.=FALSE)
 
   # Check response levels
     if (is.factor(y))  {
         if (nlevels(y) != nlevels(droplevels(y))) {
             dropped_levels <- setdiff(levels(y), levels(droplevels(y)))
             warning("Dropped unused factor level(s) in response variable: ",
-                    paste0(dropped_levels, collapse=", "), ".", call.=F)
+                    paste0(dropped_levels, collapse=", "), ".", call.=FALSE)
         }
     }
 
@@ -345,7 +345,7 @@ train <- function(
             stop("'n_try' function must have exactly one argument.")
 
       # Evaluate function
-        n_try <- try(n_try(n_predictor), silent=T)
+        n_try <- try(n_try(n_predictor), silent=TRUE)
 
         if (inherits(n_try, "try-error")) {
             message("The 'n_try' function produced the error: ", n_try)
@@ -429,7 +429,8 @@ train <- function(
                         "regression"="variance")[tree_type]
 
     if (tree_type %in% "classification") {
-        split_rule <- match.arg(split_rule, c("gini", "extratrees", "hellinger"))
+        split_rule <- match.arg(split_rule,
+                                c("gini", "extratrees", "hellinger"))
     } else if (tree_type %in% "regression") {
         split_rule <- match.arg(split_rule,
                                 c("variance", "extratrees", "maxstat", "beta"))
@@ -442,12 +443,13 @@ train <- function(
                  "in the interval (0,1).")
     } else if (split_rule == "hellinger" && ((is.factor(y) && nlevels(y) > 2) ||
                    (length(unique(y)) > 2)))
-        stop("Hellinger split metric only implemented for binary classification.")
+        stop(paste("Hellinger split metric only implemented for binary",
+                   "classification."))
 
   # Importance mode
   #  importance_mode <- match.arg(importance_mode)
 
-  # Minumum node size
+  # Minimum node size
     if (!is.numeric(min_split_n_sample) || min_split_n_sample < 0)
         stop("Invalid value for 'min_split_n_sample'.")
 
@@ -455,7 +457,7 @@ train <- function(
     if (!is.numeric(max_depth) || max_depth < 0)
         stop("Invalid value for 'max_depth'.")
 
-  # Minumum node size
+  # Minimum node size
     if (!is.numeric(min_leaf_n_sample) || min_leaf_n_sample < 0)
         stop("Invalid value for 'min_leaf_n_sample'.")
 
@@ -508,7 +510,7 @@ train <- function(
                     levels_j <- as.character(levels_j[order(means)])
                 }
               # Return reordered factor
-                factor(x_j, levels=levels_j, ordered=T, exclude=NULL)
+                factor(x_j, levels=levels_j, ordered=TRUE, exclude=NULL)
             })
         } else # Recode characters only
             x[character_ind] <- lapply(x[character_ind], factor)
@@ -523,7 +525,8 @@ train <- function(
         names_of_unordered <- predictor_names[factor_idx & !ordered_idx]
 
         if (length(names_of_unordered) > 0) {
-            n_level <- sapply(x[, factor_idx & !ordered_idx, drop=F], nlevels)
+            n_level <- sapply(x[, factor_idx & !ordered_idx, drop=FALSE],
+                              nlevels)
             limit_n_level <- (.Machine$sizeof.longlong * 8) - 1
             if (max(n_level) > limit_n_level)
                 stop("Too many levels in unordered categorical variable ",
@@ -572,8 +575,8 @@ train <- function(
                 "'extratrees'.")
 
   # Maxstat splitting
-    if (alpha < 0 || alpha > 1)
-        stop("Invalid value for 'alpha', please give a value in [0,1].")
+    if (alpha <= 0 || alpha > 1)
+        stop("Invalid value for 'alpha', please give a value in (0,1].")
 
     if (min_prop < 0 || min_prop > 0.5)
         stop("Invalid value for 'min_prop', please give a value in [0,0.5].")
@@ -597,7 +600,7 @@ train <- function(
 
     y_mat <- as.matrix(as.numeric(y))
 
-  # Call Ranger (adapted)
+  # Call the library's train function using cpp11
     result <- cpp11_train(
       # data
         x, y_mat, sparse_x, case_weights,

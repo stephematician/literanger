@@ -20,7 +20,6 @@
 
 /* standard library headers */
 #include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <iterator>
 #include <limits>
@@ -92,6 +91,16 @@ void TreeClassification::predict_from_inbag(
     const size_t bag_key = U_rng(gen);
     result = leaf_keys.at(node_key)[bag_key];
 
+}
+
+
+template <PredictionType prediction_type, typename result_type,
+          enable_if_nodes<prediction_type>>
+void TreeClassification::predict_from_inbag(
+    const size_t node_key,
+    result_type & result
+) {
+    result = node_key;
 }
 
 
@@ -305,23 +314,25 @@ void TreeClassification::best_decrease_by_real_value(
 
     size_t n_lhs = 0;
     count_vector node_n_by_response_lhs(n_response_value, 0);
-    assert(n_candidate_value > 1);
+    if (n_candidate_value <= 1)
+        throw std::runtime_error("Cannot evaluate a split for a node with "
+            "one in-bag value.");
 
     for (size_t j = 0; j != n_candidate_value - 1; ++j) {
 
         if (node_n_by_candidate[j] == 0) continue;
 
         n_lhs += node_n_by_candidate[j];
-        if (n_lhs < min_leaf_n_sample) continue;
-
-        const size_t n_rhs = n_sample_node - n_lhs;
-        if (n_rhs < min_leaf_n_sample) break;
-
       /* Update the count, by response value, that lie to the left of the
        * current candidate (split) value. */
         for (size_t k = 0; k != n_response_value; ++k)
             node_n_by_response_lhs[k] +=
                 node_n_by_candidate_and_response[j * n_response_value + k];
+
+        if (n_lhs < min_leaf_n_sample) continue;
+
+        const size_t n_rhs = n_sample_node - n_lhs;
+        if (n_rhs < min_leaf_n_sample) break;
 
         const double decrease = evaluate_decrease(node_n_by_response_lhs,
                                                   n_lhs, n_rhs);
@@ -407,7 +418,9 @@ inline double TreeClassification::evaluate_decrease(
     switch (split_rule) {
     case HELLINGER: {
       /* Hellinger rule: applied only to binary classification  */
-        assert(n_response_value == 2);
+        if (n_response_value != 2)
+            throw std::runtime_error("Cannot use Hellinger metric on "
+                "non-binary data.");
       /* TPR is the number of 1s on the right divided by the true number
        * of ones; FPR is the number of 0s on the right divided by the
        * true number of zeros */

@@ -1,8 +1,10 @@
 .gitignore
 
-unsorted/
-winlibs/
-.vscode/
+extlibs/
 
-cran-comments.md
+cran-comments.md$
 ^\.github$
+
+unsorted/
+^\.vscode$
+^CRAN-SUBMISSION$

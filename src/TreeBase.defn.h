@@ -82,7 +82,8 @@ inline key_vector TreeBase::grow(
     key_vector oob_keys { };
 
   /* Should be starting with empty tree */
-    assert(split_keys.size() == 0);
+    if (split_keys.size() != 0)
+        throw std::runtime_error("Expected to start with empty tree.");
 
   /* Implementation-specific initialisation - usually for any data used by
    * the split_node implementation */
@@ -93,7 +94,9 @@ inline key_vector TreeBase::grow(
 
     const bool response_wise = sample_fraction->size() > 1;
     const bool weighted = !case_weights->empty();
-    assert(!(weighted && response_wise));
+    if (weighted && response_wise)
+        throw std::invalid_argument("Cannot have both weighted and "
+            "response-wise (class-wise) weighting.");
 
   /* Depending on the sampling strategy, get the keys for the observed data
    * to be used for growing this tree; optionally also get the keys for the
@@ -203,7 +206,9 @@ inline void TreeBase::resample_weighted(const size_t n_sample,
                                         key_vector & sample_keys,
                                         key_vector & oob_keys) {
 
-    assert(weights->size() == n_sample);
+    if (weights->size() != n_sample)
+        throw std::invalid_argument("Case weights must have the same length "
+            "as number of rows in data.");
     const size_t n_sample_inbag = (size_t)(n_sample * (*sample_fraction)[0]);
     count_vector inbag_counts = count_vector(n_sample, 0);
 
@@ -286,7 +291,9 @@ inline bool TreeBase::split_node(const size_t node_key,
 
     const size_t n_sample_node = get_n_sample_node(node_key);
 
-    assert(!max_depth || depth <= max_depth);
+    if (max_depth && depth > max_depth)
+        throw std::runtime_error("Cannot split a node that is already at "
+            "maximum depth of tree.");
 
     { /* Test if we have reached a terminal node */
         const bool too_deep = node_key >= last_left_node_key && max_depth &&
@@ -369,7 +376,7 @@ inline bool TreeBase::split_node(const size_t node_key,
        *
        * NOTE: Casting of double to ull - unsafe? */
         size_t j = start_pos[node_key];
-        const ull_bitenc partition_key = *((size_t *)(&split_value));
+        const ull_bitenc partition_key = *((unsigned long long *)(&split_value));
         while (j < start_pos[right_key]) {
             const size_t key = sample_keys[j];
             const size_t obs_bit = std::floor(data->get_x(key, split_key) - 1);

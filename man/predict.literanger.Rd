@@ -10,7 +10,7 @@
   prediction_type = c("bagged", "inbag", "nodes"),
   seed = 1L + sample.int(n = .Machine$integer.max - 1L, size = 1),
   n_thread = 0,
-  verbose = F,
+  verbose = FALSE,
   ...
 )
 }
@@ -22,7 +22,7 @@
 \code{object$predictor_names} must be present.}
 
 \item{prediction_type}{Name of the prediction algorithm; "bagged" is the
-most-frequent value amongst in-bag samples for classification, or the mean of
+most-frequent value among in-bag samples for classification, or the mean of
 in-bag responses for regression; "inbag" predicts by drawing one in-bag
 response from a random tree for each row; "nodes" (currently unsupported)
 returns the node keys (ids) of the terminal node from every tree for each
@@ -40,7 +40,7 @@ the number of cores.}
 \item{...}{Ignored.}
 }
 \value{
-Object of class \code{literanger.prediction} with elements:
+Object of class \code{literanger_prediction} with elements:
 \describe{
 \item{\code{values}}{Predicted (drawn) classes/value for classification and
 regression.}
@@ -71,10 +71,10 @@ and mean of in bag samples respectively, is given by setting
 \code{prediction_type="bagged"}.
 
 A list is returned. The \code{values} item contains the predicted classes or
-values (classification and regression forests, respecitvely). Factor levels
+values (classification and regression forests, respectively). Factor levels
 are returned as factors with the levels as per the original training data.
 
-Compared to the original package 'ranger', literanger excludes certain
+Compared to the original package ranger, literanger excludes certain
 features:
 \itemize{
 \item Probability, survival, and quantile regression forests.
@@ -84,12 +84,18 @@ features:
 }
 \examples{
 ## Classification forest
-train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
-iris.train <- iris[train.idx, ]
-iris.test <- iris[-train.idx, ]
-rg.iris <- train(data=iris.train, response_name="Species")
-pred.iris <- predict(rg.iris, newdata=iris.test)
-table(iris.test$Species, pred.iris$values)
+train_idx <- sample(nrow(iris), 2/3 * nrow(iris))
+iris_train <- iris[ train_idx, ]
+iris_test  <- iris[-train_idx, ]
+rf_iris <- train(data=iris_train, response_name="Species")
+pred_iris_bagged <- predict(rf_iris, newdata=iris_test,
+                            prediction_type="bagged")
+pred_iris_inbag  <- predict(rf_iris, newdata=iris_test,
+                            prediction_type="inbag")
+# compare bagged vs actual test values
+table(iris_test$Species, pred_iris_bagged$values)
+# compare bagged prediction vs in-bag draw
+table(pred_iris_bagged$values, pred_iris_inbag$values)
 
 }
 \references{
@@ -101,9 +107,9 @@ effects. \emph{Computational Statistics & Data Analysis}, 72, 92-104.
 \item Stekhoven, D.J. and Buehlmann, P. (2012). MissForest--non-parametric
 missing value imputation for mixed-type data. \emph{Bioinformatics}, 28(1),
 112-118. \doi{10.1093/bioinformatics/btr597}.
-\item Wright, M. N. & Ziegler, A. (2017). ranger: A Fast Implementation of
-Random Forests for High Dimensional Data in C++ and R. J Stat Softw
-77:1-17. \doi{10.18637/jss.v077.i01}.
+\item Wright, M. N., & Ziegler, A. (2017a). ranger: A Fast Implementation of
+Random Forests for High Dimensional Data in C++ and R. \emph{Journal of
+Statistical Software}, 77, 1-17. \doi{10.18637/jss.v077.i01}.
 }
 }
 \seealso{
@@ -111,5 +117,5 @@ Random Forests for High Dimensional Data in C++ and R. J Stat Softw
 }
 \author{
 Stephen Wade \href{mailto:stephematician@gmail.com}{stephematician@gmail.com}, Marvin N Wright (original
-'ranger' package)
+ranger package)
 }

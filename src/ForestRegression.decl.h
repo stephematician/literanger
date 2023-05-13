@@ -135,6 +135,17 @@ struct ForestRegression : public Forest<ForestRegression> {
                   enable_if_inbag<prediction_type> = nullptr>
         void finalise_predictions(result_type & result);
 
+        /** Finalise imputation predictions for the forest.
+         * @param[out] result The terminal nodes of each tree for each case.
+         * @tparam prediction_type The enumerated type of predictions to
+         * calculate.
+         * @tparam result_type The type for the returned data.
+         * @tparam enable_if_nodes<prediction_type> Substitution success for
+         * PredictionType::NODES - enables partial specialisation. */
+        template <PredictionType prediction_type, typename result_type,
+                  enable_if_nodes<prediction_type> = nullptr>
+        void finalise_predictions(result_type & result);
+
         /** Calculate the predictions from one tree in the forest.
          * @param[in] tree_key The index of the tree to elicit predictions from.
          * @param[in] data Data to train forest with, see literanger::Data class
@@ -166,6 +177,10 @@ struct ForestRegression : public Forest<ForestRegression> {
         /** A (workspace) container of indices of cases that will be predicted
          * by each tree when prediction type is PredictionType::INBAG. */
         std::vector<key_vector> prediction_keys_by_tree;
+
+        /** A (workspace) container of the predicted terminal nodes for each
+         * case prediction type is PredictionType::NODES. */
+        std::vector<key_vector> prediction_nodes;
 
         /** Container for the final bagged (or otherwise) predictions. */
         dbl_vector aggregate_predictions;
