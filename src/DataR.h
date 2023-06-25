@@ -33,9 +33,8 @@
 #include "Data.h"
 
 /* standard library headers */
+#include <cstddef>
 #include <stdexcept>
-#include <string>
-#include <vector>
 
 /* R and cpp11 headers */
 #include "cpp11.hpp"
@@ -53,8 +52,8 @@ struct DataR : public Data {
          * one observation (or case) per row.
          * @param[in] y Response data with one observation (or case) per row and
          * one (or more) response values per column. */
-        DataR(const cpp11::doubles_matrix<> & x,
-              const cpp11::doubles_matrix<> & y);
+        DataR(const cpp11::doubles_matrix<> x,
+              const cpp11::doubles_matrix<> y);
 
         /** @copydoc Data::~Data */
         virtual ~DataR() override = default;
@@ -72,9 +71,9 @@ struct DataR : public Data {
     private:
 
         /** Reference to the matrix of predictor values managed by R. */
-        const cpp11::doubles_matrix<> & x;
+        const cpp11::doubles_matrix<> x;
         /** Reference to the matrix of response values managed by R. */
-        const cpp11::doubles_matrix<> & y;
+        const cpp11::doubles_matrix<> y;
 
 
 };
@@ -82,8 +81,8 @@ struct DataR : public Data {
 
 /* Member definitions */
 
-inline DataR::DataR(const cpp11::doubles_matrix<> & x,
-                    const cpp11::doubles_matrix<> & y) :
+inline DataR::DataR(const cpp11::doubles_matrix<> x,
+                    const cpp11::doubles_matrix<> y) :
     Data(y.nrow(), x.ncol()), x(x), y(y) {
 
     if (y.nrow() != x.nrow())

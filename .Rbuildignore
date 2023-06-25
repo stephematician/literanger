@@ -1,7 +1,5 @@
 .gitignore
 
-extlibs/
-
 cran-comments.md$
 ^\.github$
 

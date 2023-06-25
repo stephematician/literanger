@@ -41,9 +41,6 @@
 #include <unordered_map>
 #include <vector>
 
-/* eigen (3) sparse data headers */
-#include "eigen3/Eigen/Sparse"
-
 /* general literanger headers */
 #include "enum_types.h"
 #include "utility.h"
@@ -150,28 +147,13 @@ cpp11::list cpp11_train(
 
 
   /* Construct the data used for training */
-    Eigen::SparseMatrix<double> eigen_x;
     const bool use_sparse = sparse_x != R_NilValue;
 
     if (use_sparse) {
-        /* Convert a double (valued) compressed column-major matrix (dgCmatrix)
-         * to Eigen::sparseMatrix<double>. */
-        cpp11::integers sp_i    = { sparse_x.attr("i") };
-        cpp11::integers sp_p    = { sparse_x.attr("p") };
-        cpp11::doubles  sp_x    = { sparse_x.attr("x") };
+
         cpp11::integers sp_Dim  = { sparse_x.attr("Dim") };
 
-        if (!sp_Dim[1])
-            throw std::invalid_argument("Invalid dimension for sparse matrix.");
-
-        eigen_x.resize(sp_Dim[0], sp_Dim[1]);
-        eigen_x.reserve(sp_i.size());
-        for (size_t j_out = 0; j_out != (size_t)sp_Dim[1]; ++j_out) {
-            for (size_t j = sp_p[j_out]; j != (size_t)sp_p[j_out+1]; ++j)
-                eigen_x.insert(sp_i[j], j_out) = sp_x[j];
-        }
-
-        if ((size_t)eigen_x.cols() != (size_t)predictor_names.size())
+        if ((size_t)sp_Dim[1] != (size_t)predictor_names.size())
             throw std::domain_error("Mismatch between length of "
                 "'predictor_names' and 'x'.");
     } else {
@@ -181,7 +163,13 @@ cpp11::list cpp11_train(
     }
 
     if (use_sparse) {
-        data = std::shared_ptr<Data>(new DataSparse(eigen_x, y));
+        data = std::shared_ptr<Data>(
+            new DataSparse(cpp11::as_integers({ sparse_x.attr("Dim")}),
+                           cpp11::as_integers({ sparse_x.attr("i")}),
+                           cpp11::as_integers({ sparse_x.attr("p")}),
+                           cpp11::as_doubles({ sparse_x.attr("x")}),
+                           y)
+        );
     } else {
         data = std::shared_ptr<Data>(new DataR(x, y));
     }

@@ -1,3 +1,2 @@
 # CXX_STD = CXX14
 
-# eigen3 is installed by default as part of RTools42 and above
