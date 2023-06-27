@@ -153,7 +153,7 @@ inline void draw_no_replace(const size_t n, const size_t limit,
     if (inbag_counts.size() != limit)
         throw std::invalid_argument("Require that output counts is initially "
             "zero and length equal to maximum drawn value.");
-    const bool n_skipped = skipped.size();
+    const size_t n_skipped = skipped.size();
 
     if (n < (limit / 10)) {
       /* draw simple */
@@ -164,7 +164,7 @@ inline void draw_no_replace(const size_t n, const size_t limit,
             size_t draw;
             do {
                 draw = U_rng(gen);
-                if (n_skipped > 0) {
+                if (n_skipped != 0) {
                     for (size_t skip_value : skipped) {
                         if (draw >= skip_value) ++draw;
                     }
@@ -182,14 +182,14 @@ inline void draw_no_replace(const size_t n, const size_t limit,
         result.resize(limit);
         std::iota(result.begin(), result.end(), 0);
 
-        if (n_skipped > 0) {
+        if (n_skipped != 0) {
             /* FIXME: could swap (to back) and erase */
             for (key_vector::const_reverse_iterator key_it = skipped.crbegin();
                      key_it != skipped.crend(); ++key_it)
                 result.erase(result.begin() + *key_it);
         }
         for (size_t j = 0; j != n; ++j) {
-            size_t k = j + U_rng(gen) * (limit - n_skipped - j);
+            const size_t k = j + U_rng(gen) * (limit - n_skipped - j);
             std::swap(result[j], result[k]);
             ++inbag_counts[result[j]];
         }
