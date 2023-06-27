@@ -369,6 +369,16 @@ void Tree<ImplT>::best_decrease_by_value_largeq(
 
     ImplT & tree_impl = *static_cast<ImplT *>(this);
 
+    prepare_candidate_loop_via_index(split_key, node_key, data, sample_keys);
+
+  /* Break if pure or empty node. */
+    size_t test_n_candidate = 0;
+    for (const size_t & n : node_n_by_candidate) {
+        test_n_candidate += n > 0;
+        if (test_n_candidate == 2) break;
+    }
+    if (test_n_candidate != 2) return;
+
     const size_t n_sample_node = get_n_sample_node(node_key);
     const size_t n_candidate_value =
         data->get_n_unique_predictor_value(split_key);
@@ -385,13 +395,6 @@ void Tree<ImplT>::best_decrease_by_value_largeq(
         best_value = (x0 + x1) / 2;
         if (best_value == x1) best_value = x0;
     };
-
-    prepare_candidate_loop_via_index(split_key, node_key, data, sample_keys);
-
-  /* Break if pure or empty node. */
-    size_t real_n_candidate = 0;
-    for (const size_t & n : node_n_by_candidate) real_n_candidate += n > 0;
-    if (real_n_candidate < 2) return;
 
     tree_impl.best_decrease_by_real_value(
         split_key, n_sample_node, n_candidate_value,
