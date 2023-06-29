@@ -26,6 +26,8 @@ Depends:
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+BugReports: https://github.com/stephematician/literanger/issues
+URL: https://github.com/stephematician/literanger
 Suggests:
     Matrix (>= 1.5.3),
     testthat (>= 3.0.0),
