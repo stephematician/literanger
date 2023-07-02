@@ -41,13 +41,30 @@ inline TreeClassification::TreeClassification(
     const bool save_memory
 ) :
     Tree(parameters, save_memory), response_weights(response_weights)
-{ /* should check split rule here? */ }
+{
+
+    switch (split_rule) {
+    case HELLINGER: {
+      /* Hellinger rule: applied only to binary classification  */
+        if (n_response_value != 2)
+            throw std::runtime_error("Cannot use Hellinger metric on "
+                "non-binary data.");
+    } break;
+    case LOGRANK: case EXTRATREES: {
+    } break;
+    case MAXSTAT: case BETA: {
+        throw std::invalid_argument("Unsupported split metric for "
+            "classification.");
+    } break;
+    default: {
+        throw std::invalid_argument("Invalid split metric.");
+    } break; }
+
+}
 
 
 inline const std::unordered_map<size_t,key_vector> &
-TreeClassification::get_leaf_keys() const {
-    return leaf_keys;
-}
+TreeClassification::get_leaf_keys() const { return leaf_keys; }
 
 
 template <PredictionType prediction_type, typename result_type,
@@ -67,7 +84,7 @@ void TreeClassification::predict_from_inbag(
 
         std::unordered_map<double,double> counts;
         counts.reserve(n_response_value);
-// FIXME: incorrect index here!
+        // TODO: check index here
         for (const size_t & response_key : leaf_keys.at(node_key))
             counts[response_key] += (*response_weights)[response_key];
         if (counts.empty()) return;
@@ -85,7 +102,7 @@ void TreeClassification::predict_from_inbag(
     const size_t node_key,
     result_type & result
 ) {
-// TODO: weighted?
+    // TODO: check weighted - currently as per original ranger (ok?)
     std::uniform_int_distribution<> U_rng(0,
                                           leaf_keys.at(node_key).size() - 1);
     const size_t bag_key = U_rng(gen);
@@ -312,11 +329,9 @@ void TreeClassification::best_decrease_by_real_value(
     double & best_decrease, size_t & best_split_key, UpdateT update_best_value
 ) const {
 
+  /* NOTE: Pre-condition: n_candidate_value > 1 */
     size_t n_lhs = 0;
     count_vector node_n_by_response_lhs(n_response_value, 0);
-    if (n_candidate_value <= 1)
-        throw std::runtime_error("Cannot evaluate a split for a node with "
-            "one in-bag value.");
 
     for (size_t j = 0; j != n_candidate_value - 1; ++j) {
 
@@ -405,9 +420,7 @@ template <typename UpdateT>
 void TreeClassification::best_statistic_by_real_value(
     const size_t n_sample_node, const size_t n_candidate_value,
     double & this_decrease, UpdateT update_this_value, double & this_p_value
-) {
-    throw std::invalid_argument("Unsupported split metric for classification.");
-}
+) { /* NOTE:: Pre-condition - split rule is valid */ }
 
 
 inline double TreeClassification::evaluate_decrease(
@@ -415,12 +428,10 @@ inline double TreeClassification::evaluate_decrease(
     const size_t n_lhs, const size_t n_rhs
 ) const {
 
+  /* NOTE:: Pre-condition - split rule is valid */
+
     switch (split_rule) {
     case HELLINGER: {
-      /* Hellinger rule: applied only to binary classification  */
-        if (n_response_value != 2)
-            throw std::runtime_error("Cannot use Hellinger metric on "
-                "non-binary data.");
       /* TPR is the number of 1s on the right divided by the true number
        * of ones; FPR is the number of 0s on the right divided by the
        * true number of zeros */
@@ -448,14 +459,7 @@ inline double TreeClassification::evaluate_decrease(
         }
         return sum_rhs_sq / n_rhs + sum_lhs_sq / n_lhs;
     } break;
-    case MAXSTAT: case BETA: {
-        throw std::invalid_argument("Unsupported split metric for "
-            "classification.");
-    } break;
-    default: {
-        throw std::invalid_argument("Invalid split metric.");
-    }
-    }
+    default: break; }
 
     return -INFINITY;
 

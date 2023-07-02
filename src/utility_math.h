@@ -19,28 +19,26 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
-#include <mutex>
 
 /* general literanger headers */
 #include "utility.h"
+#include "utility_lgamma.h"
 
 
 namespace literanger {
 
+/* NOTE: lgamma is _not_ thread safe, therefore neither is beta_log_likelihood */
 inline double beta_log_likelihood(double y, double mu, double nu) {
 
-    static std::mutex lgamma_mutex;
     { /* Avoid 0 and 1 */
         const double eps = std::numeric_limits<double>::epsilon();
         y = std::max(eps, std::min(1 - eps, y));
         mu = std::max(eps, std::min(1 - eps, mu));
         nu = std::max(eps,  nu);
     }
-    double lgamma_result;
-  /* FIXME: For now, we lock as lgamma isn't thread-safe */
-    { std::unique_lock<std::mutex> lock(lgamma_mutex);
-        lgamma_result = std::lgamma(nu) - std::lgamma(mu * nu) -
-            std::lgamma((1 - mu) * nu); }
+
+    const double lgamma_result = lgamma_nn(nu) - lgamma_nn(mu * nu) -
+        lgamma_nn((1 - mu) * nu);
 
     return lgamma_result + (mu * nu - 1) * std::log(y) +
         ((1 - mu) * nu - 1) * std::log1p(-y);

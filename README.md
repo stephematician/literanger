@@ -108,7 +108,7 @@ Statistics & Data Analysis_, 72, pp. 92-104.
 
 Van Buuren, S. 2007. Multiple imputation of discrete and continuous  data by
 fully conditional specification. _Statistical Methods in Medical Research_,
-16(3), pp. 219-242. 
+16(3), pp. 219-242.
 [doi:10.1177/0962280206074463](https://doi.org/10.1177/0962280206074463).
 
 Wright, M. N. and Ziegler, A., 2017. ranger: A fast implementation of random

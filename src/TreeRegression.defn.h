@@ -39,7 +39,19 @@ inline TreeRegression::TreeRegression(const double min_prop,
                                       const TreeParameters & parameters,
                                       const bool save_memory) :
     Tree(parameters, save_memory), min_prop(min_prop)
-{ /* should check split rule here? */ }
+{
+
+    switch (split_rule) {
+    case BETA: case EXTRATREES: case LOGRANK: case MAXSTAT: {
+    } break;
+    case HELLINGER: {
+        throw std::invalid_argument("Unsupported split metric for regression.");
+    } break;
+    default: {
+        throw std::invalid_argument("Invalid split metric.");
+    } break; }
+
+}
 
 
 template <PredictionType prediction_type, typename result_type,
@@ -172,8 +184,10 @@ inline void TreeRegression::prepare_candidate_loop_via_value(
 
     node_n_by_candidate.assign(n_candidate_value, 0);
     node_sum_by_candidate.assign(n_candidate_value, 0);
-    if (split_rule == BETA)
-        response_by_candidate.assign(n_candidate_value, dbl_vector());
+    if (split_rule == BETA) {
+        response_by_candidate.resize(n_candidate_value);
+        for (auto & responses : response_by_candidate) responses.clear();
+    }
 
     for (size_t j = start_pos[node_key]; j != end_pos[node_key]; ++j) {
 
@@ -189,7 +203,7 @@ inline void TreeRegression::prepare_candidate_loop_via_value(
         ++node_n_by_candidate[offset];
         node_sum_by_candidate[offset] += response;
         if (split_rule == BETA)
-            response_by_candidate[offset].push_back(response);
+            response_by_candidate[offset].emplace_back(response);
 
     }
 
@@ -207,8 +221,10 @@ inline void TreeRegression::prepare_candidate_loop_via_index(
 
     node_n_by_candidate.assign(n_candidate_value, 0);
     node_sum_by_candidate.assign(n_candidate_value, 0);
-    if (split_rule == BETA)
-        response_by_candidate.assign(n_candidate_value, dbl_vector());
+    if (split_rule == BETA) {
+        response_by_candidate.resize(n_candidate_value);
+        for (auto & responses : response_by_candidate) responses.clear();
+    }
 
     for (size_t j = start_pos[node_key]; j != end_pos[node_key]; ++j) {
 
@@ -248,11 +264,9 @@ void TreeRegression::best_decrease_by_real_value(
     double & best_decrease, size_t & best_split_key, UpdateT update_best_value
 ) const {
 
+  /* NOTE: Pre-condition: n_candidate_value > 1. */
     size_t n_lhs = 0;
     double sum_lhs = 0;
-    if (n_candidate_value <= 1)
-        throw std::runtime_error("Cannot evaluate a split for a node with "
-            "one in-bag value.");
 
     for (size_t j = 0; j != n_candidate_value - 1; ++j) {
 
@@ -356,18 +370,12 @@ void TreeRegression::best_statistic_by_real_value(
     double & this_decrease, UpdateT update_this_value, double & this_p_value
 ) {
 
-    if (n_candidate_value <= 1)
-        throw std::runtime_error("Cannot evaluate a split for a node with "
-            "one in-bag value.");
-
-  /* smallest split to consider */
+  /* NOTE: Pre-condition: n_candidate_value > 1.
+   * smallest split to consider for this node */
     const size_t min_split = std::max(0.0, n_sample_node * min_prop - 1);
 
     double sum_lhs = 0;
     size_t n_lhs = 0;
-    if (n_candidate_value <= 1)
-        throw std::runtime_error("Cannot evaluate a split for a node with "
-            "one in-bag value.");
 
     for (size_t j = 0; j != n_candidate_value - 1; ++j) {
 
@@ -405,6 +413,8 @@ inline double TreeRegression::evaluate_decrease(
     const size_t n_lhs, const size_t n_rhs,
     const double sum_lhs, const double sum_rhs
 ) const {
+
+  /* NOTE:: Pre-condition - split rule is valid. */
 
     switch (split_rule) {
     case BETA: {
@@ -448,19 +458,18 @@ inline double TreeRegression::evaluate_decrease(
                      nu_rhs = mu_rhs * (1 - mu_rhs) / var_rhs - 1;
 
         double beta_lnL = 0;
-     /* sum beta log likelihood on lhs */
+      /* sum beta log likelihood on lhs */
         for (size_t j = 0; j != j_lhs; ++j) {
             if (node_n_by_candidate[j] == 0) continue;
             for (const double & response : response_by_candidate[j])
                 beta_lnL += beta_log_likelihood(response, mu_lhs, nu_lhs);
         }
-     /* sum beta log likelihood on r */
+      /* sum beta log likelihood on r */
         for (size_t j = j_lhs; j != n_candidate_value; ++j) {
             if (node_n_by_candidate[j] == 0) continue;
             for (const double & response : response_by_candidate[j])
                 beta_lnL += beta_log_likelihood(response, mu_rhs, nu_rhs);
         }
-
         return !std::isnan(beta_lnL) ? beta_lnL : -INFINITY;
     } break;
     case EXTRATREES: case LOGRANK: {
@@ -477,11 +486,8 @@ inline double TreeRegression::evaluate_decrease(
         const double V = n_lhs * (double)n_rhs * var / n;
         return std::fabs((S - E) / std::sqrt(V));
     } break;
-    case HELLINGER: {
-        throw std::invalid_argument("Unsupported split metric for regression.");
-    } break;
-    default: { throw std::invalid_argument("Invalid split metric."); }
-    }
+    default: {
+    } break; }
 
     return -INFINITY;
 

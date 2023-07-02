@@ -117,7 +117,7 @@ PtrT<std::vector<bool>> make_is_ordered(
  * candidates.
  * @param[in] predictor_names The names of the predictor variables in the order
  * they (will) appear in the data.
- * @param[in] names_of_always_split The names of predictor that will always
+ * @param[in] names_of_always_draw The names of predictor that will always
  * be candidates for splitting.
  * @param[in] n_try The number of candidate predictors for each split.
  * @tparam PtrT The type that manages a shared resource, defaults to a shared
