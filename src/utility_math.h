@@ -18,7 +18,9 @@
 /* standard library headers */
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <limits>
+#include <vector>
 
 /* general literanger headers */
 #include "utility.h"
@@ -27,7 +29,6 @@
 
 namespace literanger {
 
-/* NOTE: lgamma is _not_ thread safe, therefore neither is beta_log_likelihood */
 inline double beta_log_likelihood(double y, double mu, double nu) {
 
     { /* Avoid 0 and 1 */

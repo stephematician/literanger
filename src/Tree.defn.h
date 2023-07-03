@@ -25,6 +25,7 @@
 #include <random>
 #include <stdexcept>
 #include <utility>
+#include <vector>
 
 /* general literanger headers */
 #include "utility_draw.h"

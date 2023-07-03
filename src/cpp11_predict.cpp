@@ -31,10 +31,11 @@
 #include "cpp11_predict.decl.h"
 
 /* standard library headers */
+#include <algorithm>
 #include <memory>
 #include <stdexcept>
-#include <string>
 #include <thread>
+#include <vector>
 
 /* cpp11 and R headers */
 #include "cpp11.hpp"

@@ -20,6 +20,7 @@
 
 /* standard library headers */
 #include <algorithm>
+#include <cmath>
 #include <iterator>
 #include <stdexcept>
 

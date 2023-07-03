@@ -32,13 +32,9 @@
 /* standard library headers */
 #include <cstddef>
 #include <string>
-#include <vector>
 
 /* cpp11 and R headers */
 #include "cpp11.hpp"
-
-/* general literanger headers */
-#include "enum_types.h"
 
 
 /** Fit a random forest

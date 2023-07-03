@@ -20,11 +20,11 @@
 
 /* standard library headers */
 #include <algorithm>
-#include <cmath>
 #include <iterator>
+#include <mutex>
+#include <numeric>
 #include <random>
 #include <stdexcept>
-#include <mutex>
 
 /* requred literanger class definitions */
 #include "Data.defn.h"
@@ -225,7 +225,7 @@ inline void ForestRegression::new_predictions<INBAG>(
     prediction_keys_by_tree.assign(n_tree, key_vector());
 
   /* Randomly assign samples to trees */
-    std::uniform_int_distribution<size_t> U_rng(0, n_tree  - 1);
+    std::uniform_int_distribution<size_t> U_rng(0, n_tree - 1);
     for (size_t sample_key = 0; sample_key != n_sample; ++sample_key) {
         const size_t tree_key = U_rng(gen);
         prediction_keys_by_tree[tree_key].push_back(sample_key);

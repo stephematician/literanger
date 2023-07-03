@@ -19,8 +19,6 @@
 #include "ForestClassification.decl.h"
 
 /* standard library headers */
-#include <algorithm>
-#include <cmath>
 #include <iterator>
 #include <mutex>
 #include <random>

@@ -19,8 +19,8 @@
 #include "ForestBase.decl.h"
 
 /* standard library headers */
-#include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <ctime>   /* localtime */
 /* put_time is not available in GCC < 5*/
 #if !defined(__GNUC__) || __GNUC__ >= 5
@@ -30,7 +30,6 @@
 #include <ostream> /* endl */
 #include <sstream>
 #include <stdexcept>
-#include <thread>
 #include <utility>
 
 
@@ -114,18 +113,18 @@ inline void ForestBase::show_progress(std::string operation,
             std::stringstream out_fmt;
           #if !defined(__GNUC__) || __GNUC__ >= 5
             out_fmt << operation <<  " Progress: " <<
-                std::to_string(round(100 * proportion)) <<
+                std::to_string(std::round(100 * proportion)) <<
                 "%. Estimated remaining time: " <<
                 std::put_time(std::localtime(&abs_t), "%H:%M:%S") << "." <<
                 std::endl;
           #else
           /* put_time not defined - use strftime equivalent */
             char fmt_time[32];
-            bool result = strftime(fmt_time, sizeof(fmt_time), "%H:%M:%S",
-                                   std::localtime(&abs_t));
+            bool result = std::strftime(fmt_time, sizeof(fmt_time), "%H:%M:%S",
+                                        std::localtime(&abs_t));
             if (result == 0)
                 out_fmt << operation <<  " Progress: " <<
-                    std::to_string(round(100 * proportion)) <<
+                    std::to_string(std::round(100 * proportion)) <<
                     "%. Estimated remaining time: " << fmt_time << "." <<
                     std::endl;
           #endif

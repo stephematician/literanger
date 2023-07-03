@@ -21,6 +21,7 @@
 #include <iterator>
 #include <memory>
 #include <random>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <unordered_map>

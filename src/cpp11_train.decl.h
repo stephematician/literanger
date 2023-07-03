@@ -31,6 +31,7 @@
 
 /* standard library headers */
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
 

@@ -484,7 +484,7 @@ inline double TreeRegression::evaluate_decrease(
         const double S = sum_lhs;
         const double E = n_lhs * mu;
         const double V = n_lhs * (double)n_rhs * var / n;
-        return std::fabs((S - E) / std::sqrt(V));
+        return std::abs((S - E) / std::sqrt(V));
     } break;
     default: {
     } break; }

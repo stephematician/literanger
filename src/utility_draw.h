@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <random>
+#include <stdexcept>
 
 /* general literanger headers */
 #include "globals.h"

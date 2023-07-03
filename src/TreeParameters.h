@@ -15,8 +15,7 @@
 #ifndef LITERANGER_TREE_PARAMETERS_H
 #define LITERANGER_TREE_PARAMETERS_H
 
-#include <algorithm>
-#include <iterator>
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
