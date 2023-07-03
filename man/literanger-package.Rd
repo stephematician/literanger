@@ -112,6 +112,8 @@ http://www.imbs-luebeck.d
 
 \references{
 \itemize{
+\item Breiman, L. (2001). Random forests. \emph{Machine Learning}, 45, 5-32.
+\doi{10.1023/A:1010933404324}.
 \item Cieslak, D. A., Hoens, T. R., Chawla, N. V., & Kegelmeyer, W. P. (2012).
 Hellinger distance decision trees are robust and skew-insensitive. \emph{Data
 Mining and Knowledge Discovery}, 24, 136-158.
@@ -139,6 +141,14 @@ variable selection for random survival forests using maximally selected
 rank statistics. \emph{Statistics in medicine}, 36(8), 1272-1284.
 \doi{10.1002/sim.7212}.
 }
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/stephematician/literanger}
+  \item Report bugs at \url{https://github.com/stephematician/literanger/issues}
+}
+
 }
 \author{
 Stephen Wade \href{mailto:stephematician@gmail.com}{stephematician@gmail.com}, Marvin N Wright (original

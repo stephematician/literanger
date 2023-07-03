@@ -136,6 +136,8 @@
 #'
 #' @references
 #'
+#' -   Breiman, L. (2001). Random forests. _Machine Learning_, 45, 5-32.
+#'     \doi{10.1023/A:1010933404324}.
 #' -   Cieslak, D. A., Hoens, T. R., Chawla, N. V., & Kegelmeyer, W. P. (2012).
 #'     Hellinger distance decision trees are robust and skew-insensitive. _Data
 #'     Mining and Knowledge Discovery_, 24, 136-158.

@@ -1,6 +1,6 @@
 Package: literanger
 Title: Random Forests for Multiple Imputation Based on 'ranger'
-Version: 0.0.1
+Version: 0.0.2
 Authors@R:
     c(person("Stephen", "Wade",
              email="stephematician@gmail.com",

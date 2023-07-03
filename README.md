@@ -10,7 +10,7 @@ _Stephen Wade_
 `literanger` is an adaption of the [`ranger`][ranger_cran] R package for
 training and predicting from random forest models within multiple imputation
 algorithms. `ranger` is a fast implementation of random forests
-([Breiman, 2001][brieman2001_doi]) or recursive partitioning, particularly
+([Breiman, 2001][breiman2001_doi]) or recursive partitioning, particularly
 suited for high dimensional data ([Wright et al, 2017][wright2017_doi]).
 `literanger` enables random forests to be embedded in the fully conditional
 specification framework for multiple imputation known as 'Multiple Imputation
@@ -116,7 +116,7 @@ forests for high dimensional data in C++ and R. _Journal of Statistical
 Software_, 77(i01), pp. 1-17.
 [doi:10.18637/jss.v077.i01](https://doi.org/10.18637/jss.v077.i01).
 
-[brieman2001_doi]: https://doi.org/10.1023/A:1010933404324
+[breiman2001_doi]: https://doi.org/10.1023/A:1010933404324
 [doove2014_doi]: https://doi.org/10.1016/j.csda.2013.10.025
 [vanbuuren2007_doi]: https://doi.org/10.1177/0962280206074463
 [wright2017_doi]: https://doi.org/10.18637/jss.v077.i01
