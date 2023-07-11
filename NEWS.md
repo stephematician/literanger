@@ -11,6 +11,10 @@ Bug-fixes
 -   Fix container overrun and incorrect (unweighted) sampling without
     replacement.
 
+Documentation fixes
+-   Incorrect spelling of Breiman and missing reference in README
+-   Added github links
+
 
 # version 0.0.1
 

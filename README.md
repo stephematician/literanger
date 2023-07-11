@@ -36,13 +36,13 @@ object and the separation of the (training) data from the forest, see `ranger`
 [issue #304](https://github.com/imbs-hl/ranger/issues/304).
 
 A multiple imputation algorithm using this package is under development: called
-[`smirf`][smirf_github].
+[`mimputest`][mimputest_github].
 
 [mice_cran]: https://cran.r-project.org/package=mice
 [miceranger_cran]: https://cran.r-project.org/package=miceRanger
 [missranger_cran]: https://cran.r-project.org/package=missRanger
 [ranger_cran]: https://cran.r-project.org/package=ranger
-[smirf_github]: https://github.com/stephematician/smirf
+[mimputest_github]: https://github.com/stephematician/mimputest
 
 
 ## Example
