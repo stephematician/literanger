@@ -294,7 +294,7 @@ PtrT<std::vector<size_t>> make_draw_always_predictor_keys(
             "predictors (columns)");
 
   /* must be sorted to pass to draw_no_replace */
-    std::sort(result.begin(), result.end());
+    std::sort(result->begin(), result->end());
 
     return result;
 }
