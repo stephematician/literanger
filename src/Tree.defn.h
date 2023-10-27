@@ -295,7 +295,7 @@ void Tree<ImplT>::best_decrease_by_value_extratrees_unordered(
         { /* allow full or empty for splitting on non-present values */
             const size_t n_partition =
                 (2ull << (is_ex_node.count() - 1ull)) - 1ull;
-            u_rng_t U_rng(0, n_partition);
+            ull_rng_t U_rng(0, n_partition);
 
             const ull_bitenc drawn_ex_partition = U_rng(gen);
             size_t key_j = 0;
