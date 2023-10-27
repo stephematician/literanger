@@ -7,7 +7,7 @@ Submit version 0.0.2: bug fix and performance improvements.
     https://www.stats.ox.ac.uk/pub/bdr/memtests/clang-ASAN/literanger/00check.log
 
 
-# `win-builder` R CMD CHECK results 
+## `win-builder` R CMD CHECK results 
 
 ```
   Maintainer: 'Stephen Wade <stephematician@gmail.com>'
@@ -32,7 +32,7 @@ Submit version 0.0.2: bug fix and performance improvements.
 -   The misspelled words above are names.
 
 
-# Ubuntu 22.04 (my machine) R CMD CHECK results
+## Ubuntu 22.04 (my machine) R CMD CHECK results
 
 ```
 ── R CMD check results ─────────────────────────────────── literanger 0.0.2 ────

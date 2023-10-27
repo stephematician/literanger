@@ -71,7 +71,8 @@ void Tree<ImplT>::predict(const std::shared_ptr<const Data> data,
             }
         } else {
           /* NOTE: probably unsafe */
-            const ull_bitenc split_enc = *((size_t *)(&split_values[node_key]));
+            const ull_bitenc split_enc =
+                *((unsigned long long *)(&split_values[node_key]));
             if (!split_enc.test(std::floor(value) - 1)) {
                 node_key = left_children[node_key];
             } else {
@@ -275,11 +276,12 @@ void Tree<ImplT>::best_decrease_by_value_extratrees_unordered(
    * is drawn randomly from all available partitions that put at least one of
    * the observed levels to the right. */
     auto to_partition_key = [&](size_t j){
+        using ull_rng_t = std::uniform_int_distribution<unsigned long long>;
         ull_bitenc key = 0;
         { /* don't allow full or empty for splitting on present values */
             const size_t n_partition =
                 (2ull << (is_in_node.count() - 1ull)) - 2ull;
-            std::uniform_int_distribution<size_t> U_rng(1, n_partition);
+            ull_rng_t U_rng(1, n_partition);
 
             const ull_bitenc drawn_in_partition = U_rng(gen);
             size_t key_j = 0;
@@ -293,7 +295,7 @@ void Tree<ImplT>::best_decrease_by_value_extratrees_unordered(
         { /* allow full or empty for splitting on non-present values */
             const size_t n_partition =
                 (2ull << (is_ex_node.count() - 1ull)) - 1ull;
-            std::uniform_int_distribution<size_t> U_rng(0, n_partition);
+            u_rng_t U_rng(0, n_partition);
 
             const ull_bitenc drawn_ex_partition = U_rng(gen);
             size_t key_j = 0;

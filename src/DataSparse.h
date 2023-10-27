@@ -114,7 +114,7 @@ inline double DataSparse::get_x(const size_t sample_key,
     /* test this TODO: */
     using int_t = cpp11::integers::value_type;
     const int_t j_start = x_p[predictor_key];
-    const int_t j_end = x_p[predictor_key + 1l];
+    const int_t j_end = x_p[predictor_key + (size_t)1];
     if (j_start == j_end) return 0.0;
 
     const int_t row_offset = as_row_offset(sample_key, permute);

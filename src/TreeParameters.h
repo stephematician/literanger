@@ -47,7 +47,7 @@ struct TreeParameters {
      * each tree.
      * @param[in] n_try The number of candidate predictors for each split.
      * @param[in] draw_always_predictor_keys The key of each predictor that will
-     * always be a candidate for splitting.
+     * always be a candidate for splitting (sorted by key).
      * @param[in] draw_predictor_weights Weights for each predictor when drawing
      * candidates.
      * @param[in] split_rule The rule for identifying the best split.

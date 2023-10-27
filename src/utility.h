@@ -115,7 +115,7 @@ PtrT<std::vector<bool>> make_is_ordered(
 
 
 /** Make a container of keys for the predictors that are always
- * candidates.
+ * candidates (sorted by key).
  * @param[in] predictor_names The names of the predictor variables in the order
  * they (will) appear in the data.
  * @param[in] names_of_always_draw The names of predictor that will always
@@ -292,6 +292,9 @@ PtrT<std::vector<size_t>> make_draw_always_predictor_keys(
         throw std::domain_error("Number of predictors to always consider "
             "splitting plus 'n_try' cannot be larger than total number of "
             "predictors (columns)");
+
+  /* must be sorted to pass to draw_no_replace */
+    std::sort(result.begin(), result.end());
 
     return result;
 }
